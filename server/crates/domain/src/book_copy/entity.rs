@@ -6,7 +6,8 @@ pub struct BookCopy {
     pub dt_created: DateTime<Utc>,
     pub dt_modified: DateTime<Utc>,
     pub book_id: i64,
-    pub author_name: String
+    pub author_name: String,
+    pub status: String
 }
 
 pub struct BookCopyCreationPayload {
@@ -20,6 +21,37 @@ pub struct BookCopyPrepared {
     pub author_name: String,
     pub book_id: i64,
     pub status: &'static str
+}
+
+impl BookCopy {
+    #[must_use]
+    pub fn can_be_sent_to_maintenance(&self) -> bool {
+        return self.status != "loaned" && self.status != "lost"
+    }
+    #[must_use]
+    pub fn can_be_returned_from_maintenance(&self) -> bool {
+        return self.status == "maintenance"
+    }
+    #[must_use]
+    pub fn can_be_marked_lost(&self) -> bool {
+        return self.status != "lost"
+    }
+    #[must_use]
+    pub fn can_be_returned_from_lost(&self) -> bool {
+        return self.status == "lost"
+    }
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum BookCopyError {
+    #[error("Book is loaned or lost and cannot be sent to maintenance")]
+    CannotBeSentToMaintenance,
+    #[error("Book is not currently in maintenance, and therefore cannot be returned")]
+    CannotBeReturnedFromMaintenance,
+    #[error("Book is already marked lost.")]
+    CannotMarkBookLost,
+    #[error("Book is not currently lost, and cannot be returned from lost")]
+    CannotBeReturnedFromLost,
 }
 
 impl BookCopyCreationPayload {

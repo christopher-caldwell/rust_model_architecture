@@ -67,6 +67,7 @@ dependencies = [
  "async-trait",
  "domain",
  "nanoid",
+ "thiserror",
  "tracing",
 ]
 
@@ -451,6 +452,7 @@ version = "0.1.0"
 dependencies = [
  "async-trait",
  "chrono",
+ "thiserror",
 ]
 
 [[package]]
