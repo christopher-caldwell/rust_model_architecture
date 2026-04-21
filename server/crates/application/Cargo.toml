@@ -1,0 +1,11 @@
+[package]
+name = "application"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+domain = { path = "../domain" }
+async-trait = "0.1"
+nanoid = "0.4.0"
+tracing = "0.1"
+anyhow = "1"

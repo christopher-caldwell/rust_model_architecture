@@ -1,0 +1,9 @@
+set dotenv-load := true
+
+# Generate TSV files into output/
+generate:
+    cargo run
+
+# Stream TSV files into Postgres (requires output/ from generate)
+load:
+    @bash load.sh

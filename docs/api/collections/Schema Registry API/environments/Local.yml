@@ -1,4 +1,0 @@
-name: Local
-variables:
-  - name: BASE_URL
-    value: http://localhost:8000

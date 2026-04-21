@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO brochure.contact_inquiry (contact_inquiry_ident, status_id, first_name, last_name, email, website_given, message)\nVALUES\n(\n      $1\n    , (SELECT struct_type_id FROM brochure.struct_type st WHERE st.att_pub_ident = $2 AND st.group_name = 'contact_inquiry_status')\n    , $3\n    , $4\n    , $5\n    , $6\n    , $7\n)\nRETURNING\n    contact_inquiry_id\n;\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "contact_inquiry_id",
+        "type_info": "Int2"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "c27f54448319dd7a3780920d1cec55206d08100bda80c0405d0e4f822dd1b39f"
+}

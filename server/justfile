@@ -1,0 +1,50 @@
+# Start dev server with hot reload (requires: cargo install cargo-watch)
+dev:
+    RUST_LOG=warn cargo watch -x 'run -p server'
+
+# Build release binary
+build:
+    cargo build --release -p server
+
+# Run release binary
+run: build
+    ./target/release/server
+
+# Type check all crates
+typecheck:
+    cargo check --workspace
+
+lint:
+    cargo clippy --workspace --all-targets --all-features -- -D warnings -W clippy::pedantic
+
+# Format code
+fmt:
+    cargo fmt --all
+
+# Format check (non-destructive)
+fmt-check:
+    cargo fmt --all -- --check
+
+# Run tests
+test:
+    cargo test --workspace
+
+# Cache sqlx query metadata for offline compilation.
+#
+# The query_file_as! macros (used in repo.rs) verify SQL against a live database
+# at compile time. This means `cargo check` / `cargo build` normally requires
+# DATABASE_URL to be set and the database to be reachable.
+#
+# `cargo sqlx prepare` connects to the database ONCE, validates every query macro
+# in the codebase, and saves the results to a `.sqlx/` directory. After this:
+#   - Compilation no longer needs a live database
+#   - CI can build without database access
+#   - The `.sqlx/` directory should be committed to version control
+#
+# Re-run this whenever you change a query_file_as! query or the DB schema.
+sqlx-prepare:
+    DATABASE_URL=$SERVICE_DATABASE_URL cargo sqlx prepare --workspace
+
+# Full sanity check: typecheck + clippy + fmt-check
+check-sanity: typecheck lint fmt-check
+    @echo "✅ All checks passed"
