@@ -21,6 +21,21 @@ pub struct LoanPrepared {
     pub book_copy: i64
 }
 
+impl Loan {
+    #[must_use]
+    pub fn can_be_returned(&self) -> bool {
+        self.dt_returned.is_none()
+    }
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum LoanError {
+    #[error("Book copy does not have an active loan")]
+    NoActiveLoanForBookCopy,
+    #[error("Loan has already been returned")]
+    CannotBeReturned,
+}
+
 impl LoanCreationPayload {
     #[must_use]
     pub fn prepare(self) -> LoanPrepared {

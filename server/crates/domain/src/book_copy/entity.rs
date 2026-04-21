@@ -25,6 +25,10 @@ pub struct BookCopyPrepared {
 
 impl BookCopy {
     #[must_use]
+    pub fn can_be_borrowed(&self) -> bool {
+        self.status == "active"
+    }
+    #[must_use]
     pub fn can_be_sent_to_maintenance(&self) -> bool {
         return self.status != "loaned" && self.status != "lost"
     }
@@ -44,6 +48,8 @@ impl BookCopy {
 
 #[derive(thiserror::Error, Debug)]
 pub enum BookCopyError {
+    #[error("Book cannot currently be borrowed")]
+    CannotBeBorrowed,
     #[error("Book is loaned or lost and cannot be sent to maintenance")]
     CannotBeSentToMaintenance,
     #[error("Book is not currently in maintenance, and therefore cannot be returned")]

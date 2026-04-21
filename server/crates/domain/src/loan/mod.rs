@@ -1,3 +1,3 @@
 mod entity;
 
-pub use entity::{Loan, LoanCreationPayload, LoanPrepared};
+pub use entity::{Loan, LoanCreationPayload, LoanError, LoanPrepared};
