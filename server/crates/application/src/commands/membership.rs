@@ -1,8 +1,11 @@
-use domain::member::{Member, MemberCreationPayload, MemberError};
-use std::sync::Arc;
 use anyhow::Context;
+use domain::{
+    member::{Member, MemberCreationPayload, MemberError, MemberStatus},
+    uow::WriteUnitOfWorkFactory,
+};
+use std::sync::Arc;
 
-use crate::ports::{gen_ident::IdentGeneratorPort, uow::WriteUnitOfWorkFactory};
+use crate::ports::gen_ident::IdentGeneratorPort;
 
 #[derive(Clone)]
 pub struct MembershipCommands {
@@ -16,16 +19,13 @@ impl MembershipCommands {
         uow_factory: Arc<dyn WriteUnitOfWorkFactory>,
         ident_generator: Arc<dyn IdentGeneratorPort>,
     ) -> Self {
-        Self {
-            uow_factory,
-            ident_generator,
-        }
+        Self { uow_factory, ident_generator }
     }
 
     async fn change_member_status(
         &self,
         member: Member,
-        new_status: &str,
+        new_status: MemberStatus,
         added_context: &'static str,
     ) -> anyhow::Result<Member> {
         let uow = self.uow_factory.build().await.context("Failed to build unit of work")?;
@@ -34,10 +34,7 @@ impl MembershipCommands {
             .update_status(member.id, new_status)
             .await
             .context(added_context)?;
-        uow.commit()
-            .await
-            .context("Failed to commit transaction")?;
-
+        uow.commit().await.context("Failed to commit transaction")?;
         Ok(result)
     }
 
@@ -53,32 +50,17 @@ impl MembershipCommands {
             .create(&prepared)
             .await
             .context("Failed to register member")?;
-        uow.commit()
-            .await
-            .context("Failed to commit transaction")?;
-
+        uow.commit().await.context("Failed to commit transaction")?;
         Ok(result)
     }
 
-    pub async fn suspend_member(
-        &self,
-        member: Member,
-    ) -> anyhow::Result<Member> {
-
+    pub async fn suspend_member(&self, member: Member) -> anyhow::Result<Member> {
         anyhow::ensure!(member.can_be_suspended(), MemberError::CannotBeSuspended);
-        let result = self.change_member_status(member, "suspended", "Failed to suspend member").await?;
-
-        Ok(result)
+        self.change_member_status(member, MemberStatus::Suspended, "Failed to suspend member").await
     }
 
-    pub async fn reactivate_member(
-        &self,
-        member: Member,
-    ) -> anyhow::Result<Member> {
-
+    pub async fn reactivate_member(&self, member: Member) -> anyhow::Result<Member> {
         anyhow::ensure!(member.can_be_reactivated(), MemberError::CannotBeReactivated);
-        let result = self.change_member_status(member, "active", "Failed to reactivate member").await?;
-
-        Ok(result)
+        self.change_member_status(member, MemberStatus::Active, "Failed to reactivate member").await
     }
 }

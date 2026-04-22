@@ -1,3 +1,4 @@
 mod entity;
+pub mod port;
 
-pub use entity::{Book, BookPrepared, BookCreationPayload};
+pub use entity::{Book, BookCreationPayload, BookId, BookPrepared};

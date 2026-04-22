@@ -1,41 +1,53 @@
 use chrono::{DateTime, Utc};
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[repr(transparent)]
+pub struct MemberId(pub i16);
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum MemberStatus {
+    Active,
+    Suspended,
+}
+
 pub struct Member {
-    pub id: i16,
+    pub id: MemberId,
     pub ident: String,
     pub dt_created: DateTime<Utc>,
     pub dt_modified: DateTime<Utc>,
-    pub status: String,
+    pub status: MemberStatus,
     pub full_name: String,
-    pub max_active_loans: i16
-
+    pub max_active_loans: i16,
 }
 
 pub struct MemberCreationPayload {
     pub full_name: String,
-    pub max_active_loans: i16
+    pub max_active_loans: i16,
 }
 
 pub struct MemberPrepared {
     pub ident: String,
     pub full_name: String,
     pub max_active_loans: i16,
-    pub status: &'static str
+    pub status: MemberStatus,
 }
 
 impl Member {
     #[must_use]
     pub fn can_be_suspended(&self) -> bool {
-        return self.status != "suspended"
+        self.status != MemberStatus::Suspended
     }
+
     #[must_use]
     pub fn can_be_reactivated(&self) -> bool {
-        return self.status == "suspended"
+        self.status == MemberStatus::Suspended
     }
+
     #[must_use]
     pub fn can_borrow(&self) -> bool {
-        self.status == "active"
+        self.status == MemberStatus::Active
     }
+
     #[must_use]
     pub fn can_check_out_more_books(&self, active_loan_count: i64) -> bool {
         active_loan_count < i64::from(self.max_active_loans)
@@ -55,20 +67,13 @@ pub enum MemberError {
 }
 
 impl MemberCreationPayload {
-    // #[must_use]
-    // pub fn is_spam(&self, likelihood: u8) -> bool {
-    //     likelihood >= SPAM_LIKELIHOOD_THRESHOLD
-    // }
-
     #[must_use]
     pub fn prepare(self, ident: String) -> MemberPrepared {
-        // let is_spam = self.is_spam(spam_rating);
-        let status: &str = "active";
         MemberPrepared {
             ident,
             full_name: self.full_name,
             max_active_loans: self.max_active_loans,
-            status,
+            status: MemberStatus::Active,
         }
     }
 }
