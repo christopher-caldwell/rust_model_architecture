@@ -1,6 +1,6 @@
 use axum::{extract::State, http::StatusCode, Json};
 
-use crate::{
+use crate::router::{
     dependencies::ServerDeps,
     health::schemas::{HealthCheckResponseBody, HEALTH_CHECK_TAG},
 };

@@ -24,3 +24,4 @@ jsonwebtoken = { version = "10.3.0", features = ["rust_crypto"] }
 utoipa-axum = "0.2"
 tower-http = { version = "0.6", features = ["cors"] }
 http = "1"
+nanoid = "0.4"

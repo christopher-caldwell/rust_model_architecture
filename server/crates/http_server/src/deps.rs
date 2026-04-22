@@ -1,19 +1,27 @@
-use std::{collections::HashMap, sync::Arc};
+use std::sync::Arc;
 
-use crate::router::{AuthDeps, ContactInquiryDeps, ServerDeps};
+use crate::router::dependencies::{AuthDeps, CatalogDeps, LendingDeps, MembershipDeps, ServerDeps};
 use anyhow::{Context, Result};
-use application::{ContactInquiryCommands, ContactInquiryQueries};
-use infrastructure::{
-    llm::ContactInquirySpamRatingAdapter,
-    llm_provider::anthropic::{AnthropicClient, AnthropicModel},
+use application::{
+    commands::{CatalogCommands, LendingCommands, MembershipCommands},
+    ports::gen_ident::IdentGeneratorPort,
+    queries::{CatalogQueries, LendingQueries, MembershipQueries},
 };
 use persistence::{
-    contact_inquiry::{ContactInquiryReadRepoSql, ContactInquiryStatusRepoSql},
-    uow::SqlWriteUnitOfWorkFactory,
+    book::BookReadRepoSql, book_copy::BookCopyReadRepoSql, loan::LoanReadRepoSql,
+    member::MemberReadRepoSql, uow::SqlWriteUnitOfWorkFactory,
 };
 use sqlx::{postgres::PgPoolOptions, PgPool};
 
 use crate::config::ServerConfig;
+
+struct MemberIdentGenerator;
+
+impl IdentGeneratorPort for MemberIdentGenerator {
+    fn gen(&self) -> String {
+        nanoid::nanoid!(10)
+    }
+}
 
 async fn connect_pool(database_url: &str, label: &str) -> Result<PgPool> {
     PgPoolOptions::new()
@@ -32,38 +40,42 @@ pub async fn create_server_deps(config: &ServerConfig) -> Result<ServerDeps> {
     let rw_pool = connect_pool(&config.database_rw_url, "read-write").await?;
 
     let write_uow_factory = Arc::new(SqlWriteUnitOfWorkFactory { pool: rw_pool });
-    let contact_inquiry_read = Arc::new(ContactInquiryReadRepoSql {
+
+    let book_read_repo = Arc::new(BookReadRepoSql {
         pool: ro_pool.clone(),
     });
-    let contact_inquiry_status = Arc::new(ContactInquiryStatusRepoSql {
-        pool: ro_pool,
-        ident_cache: tokio::sync::RwLock::new(HashMap::new()),
-        id_cache: tokio::sync::RwLock::new(HashMap::new()),
+    let book_copy_read_repo = Arc::new(BookCopyReadRepoSql { pool: ro_pool });
+    let loan_read_repo = Arc::new(LoanReadRepoSql {
+        pool: book_copy_read_repo.pool.clone(),
     });
-    let contact_inquiry_spam = Arc::new(ContactInquirySpamRatingAdapter {
-        llm_client: AnthropicClient {
-            api_key: config.anthropic_api_key.clone(),
-            model: AnthropicModel::Claude4_5Haiku,
-            http_client: reqwest::Client::new(),
-        },
+    let member_read_repo = Arc::new(MemberReadRepoSql {
+        pool: loan_read_repo.pool.clone(),
     });
+    let ident_generator = Arc::new(MemberIdentGenerator);
 
-    let contact_inquiry_commands = Arc::new(ContactInquiryCommands::new(
-        write_uow_factory,
-        contact_inquiry_spam,
-    ));
-    let contact_inquiry_queries = Arc::new(ContactInquiryQueries::new(
-        contact_inquiry_read,
-        contact_inquiry_status,
-    ));
+    let catalog_commands = Arc::new(CatalogCommands::new(write_uow_factory.clone()));
+    let lending_commands = Arc::new(LendingCommands::new(write_uow_factory.clone()));
+    let membership_commands = Arc::new(MembershipCommands::new(write_uow_factory, ident_generator));
+
+    let catalog_queries = Arc::new(CatalogQueries::new(book_read_repo, book_copy_read_repo));
+    let lending_queries = Arc::new(LendingQueries::new(loan_read_repo));
+    let membership_queries = Arc::new(MembershipQueries::new(member_read_repo));
 
     Ok(ServerDeps {
         auth: AuthDeps {
             jwt_secret: config.jwt_secret.clone(),
         },
-        contact_inquiry: ContactInquiryDeps {
-            commands: contact_inquiry_commands,
-            queries: contact_inquiry_queries,
+        catalog: CatalogDeps {
+            commands: catalog_commands,
+            queries: catalog_queries,
+        },
+        lending: LendingDeps {
+            commands: lending_commands,
+            queries: lending_queries,
+        },
+        membership: MembershipDeps {
+            commands: membership_commands,
+            queries: membership_queries,
         },
     })
 }

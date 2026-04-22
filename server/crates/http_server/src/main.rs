@@ -1,6 +1,3 @@
-mod config;
-mod deps;
-
 use anyhow::{anyhow, Context, Result};
 use dotenvy::dotenv;
 use std::net::SocketAddr;
@@ -8,7 +5,7 @@ use tokio::net::TcpListener;
 use tracing::info;
 use tracing_subscriber::EnvFilter;
 
-use crate::router::new_router;
+use http_server::{config, deps, router::new_router};
 
 #[tokio::main]
 async fn main() -> Result<()> {

@@ -1,6 +1,0 @@
-name: Prod
-variables:
-  - name: BASE_URL
-    value: https://rust-server-production-b090.up.railway.app
-  - secret: true
-    name: JWT_TOKEN

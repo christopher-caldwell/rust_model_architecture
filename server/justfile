@@ -1,10 +1,10 @@
 # Start dev server with hot reload (requires: cargo install cargo-watch)
 dev:
-    RUST_LOG=warn cargo watch -x 'run -p server'
+    RUST_LOG=warn cargo watch -x 'run -p http_server'
 
 # Build release binary
 build:
-    cargo build --release -p server
+    cargo build --release -p http_server
 
 # Run release binary
 run: build

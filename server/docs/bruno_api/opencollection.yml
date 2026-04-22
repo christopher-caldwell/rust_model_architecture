@@ -1,7 +1,7 @@
 opencollection: 1.0.0
 
 info:
-  name: Craft Code CRM
+  name: Demo Library
 config:
   proxy:
     inherit: true

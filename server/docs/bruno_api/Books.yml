@@ -1,11 +1,11 @@
 info:
-  name: Get List
+  name: Books
   type: http
   seq: 1
 
 http:
   method: GET
-  url: "{{BASE_URL}}/contact-inquiries"
+  url: "{{BASE_URL}}/books"
   auth: inherit
 
 settings:

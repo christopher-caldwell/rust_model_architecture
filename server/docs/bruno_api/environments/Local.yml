@@ -1,4 +1,6 @@
-name: Local
+name: local
 variables:
   - name: BASE_URL
     value: http://localhost:3000
+  - secret: true
+    name: JWT_TOKEN
