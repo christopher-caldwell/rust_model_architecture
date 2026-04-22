@@ -1,6 +1,6 @@
 use chrono::{DateTime, Utc};
 use domain::book_copy::{BookCopy, BookCopyStatus};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 pub const BOOK_COPIES_TAG: &str = "Book Copies";
@@ -30,6 +30,13 @@ impl From<BookCopy> for BookCopyResponseBody {
             status: book_copy_status_text(&value.status),
         }
     }
+}
+
+#[derive(Deserialize, ToSchema)]
+pub struct CreateBookCopyRequestBody {
+    pub isbn: String,
+    pub barcode: String,
+    pub author_name: String,
 }
 
 fn book_copy_status_text(status: &BookCopyStatus) -> String {

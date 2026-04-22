@@ -44,9 +44,3 @@ impl From<CreateBookRequestBody> for BookCreationPayload {
         }
     }
 }
-
-#[derive(Deserialize, ToSchema)]
-pub struct CreateBookCopyRequestBody {
-    pub barcode: String,
-    pub author_name: String,
-}

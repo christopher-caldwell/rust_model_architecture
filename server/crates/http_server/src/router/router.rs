@@ -1,13 +1,11 @@
 use crate::router::auth::auth_middleware;
 use crate::router::book_copies::{
-    complete_book_copy_maintenance, get_book_copy_by_id, mark_book_copy_found, mark_book_copy_lost,
-    report_book_copy_lost_on_loan, return_book_copy, send_book_copy_to_maintenance,
-    BOOK_COPY_BY_ID_PATH, BOOK_COPY_LOSS_PATH, BOOK_COPY_LOSS_REPORTS_PATH,
-    BOOK_COPY_MAINTENANCE_PATH, BOOK_COPY_RETURNS_PATH,
+    complete_book_copy_maintenance, create_book_copy, get_book_copy_by_id, mark_book_copy_found,
+    mark_book_copy_lost, report_book_copy_lost_on_loan, return_book_copy,
+    send_book_copy_to_maintenance, BOOK_COPIES_PATH, BOOK_COPY_BY_ID_PATH, BOOK_COPY_LOSS_PATH,
+    BOOK_COPY_LOSS_REPORTS_PATH, BOOK_COPY_MAINTENANCE_PATH, BOOK_COPY_RETURNS_PATH,
 };
-use crate::router::books::{
-    create_book, create_book_copy, get_books, BOOKS_PATH, BOOK_COPIES_BY_BOOK_ID_PATH,
-};
+use crate::router::books::{create_book, get_books, BOOKS_PATH};
 use crate::router::cors::get_cors;
 use crate::router::dependencies::ServerDeps;
 use crate::router::loans::{create_loan, get_overdue_loans, LOANS_PATH, OVERDUE_LOANS_PATH};
@@ -54,7 +52,7 @@ pub fn new_router(deps: ServerDeps) -> Router {
 
     let protected_router = Router::new()
         .route(BOOKS_PATH, get(get_books).post(create_book))
-        .route(BOOK_COPIES_BY_BOOK_ID_PATH, post(create_book_copy))
+        .route(BOOK_COPIES_PATH, post(create_book_copy))
         .route(BOOK_COPY_BY_ID_PATH, get(get_book_copy_by_id))
         .route(
             BOOK_COPY_LOSS_PATH,

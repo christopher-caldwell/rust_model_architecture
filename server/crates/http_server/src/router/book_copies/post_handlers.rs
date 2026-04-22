@@ -1,11 +1,13 @@
 use axum::{
     extract::{Path, State},
+    http::StatusCode,
     Json,
 };
+use domain::book_copy::BookCopyCreationPayload;
 
 use crate::router::{
     auth::AuthUser,
-    book_copies::schemas::{BookCopyResponseBody, BOOK_COPIES_TAG},
+    book_copies::schemas::{BookCopyResponseBody, CreateBookCopyRequestBody, BOOK_COPIES_TAG},
     dependencies::ServerDeps,
     errors::{not_found, service_error, ApiError},
     loans::schemas::LoanResponseBody,
@@ -93,4 +95,47 @@ pub async fn report_book_copy_lost_on_loan(
     };
 
     Ok(book_copy_response)
+}
+
+#[utoipa::path(
+    post,
+    path = "",
+    tag = BOOK_COPIES_TAG,
+    request_body = CreateBookCopyRequestBody,
+    responses(
+        (status = 201, description = "Book copy created", body = BookCopyResponseBody),
+        (status = 401, description = "Unauthorized"),
+        (status = 403, description = "Forbidden"),
+        (status = 404, description = "Book not found", body = crate::router::errors::ErrorResponseBody),
+        (status = 500, description = "Internal server error", body = crate::router::errors::ErrorResponseBody)
+    ),
+    security(("bearer_auth" = []))
+)]
+pub async fn create_book_copy(
+    AuthUser(_claims): AuthUser,
+    State(deps): State<ServerDeps>,
+    Json(body): Json<CreateBookCopyRequestBody>,
+) -> Result<(StatusCode, Json<BookCopyResponseBody>), ApiError> {
+    let book_result = deps.catalog.queries.get_book_by_isbn(&body.isbn).await;
+
+    let book = match book_result {
+        Ok(Some(book)) => book,
+        Ok(None) => return Err(not_found("Book not found")),
+        Err(error) => return Err(service_error(error)),
+    };
+
+    let payload = BookCopyCreationPayload {
+        barcode: body.barcode,
+        author_name: body.author_name,
+        book_id: book.id,
+    };
+
+    let add_book_copy_result = deps.catalog.commands.add_book_copy(payload).await;
+
+    let book_copy_response = match add_book_copy_result {
+        Ok(book_copy) => Json(BookCopyResponseBody::from(book_copy)),
+        Err(error) => return Err(service_error(error)),
+    };
+
+    Ok((StatusCode::CREATED, book_copy_response))
 }
