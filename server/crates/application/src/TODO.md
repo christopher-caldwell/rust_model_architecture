@@ -309,12 +309,12 @@ Next I’d lock which of these return full domain models vs read DTOs.
 
 #### Catalog
 
-- [ ] `GetBookCatalog`
-- [ ] `GetBookCopyDetails`
+- [x] `GetBookCatalog`
+- [x] `GetBookCopyDetails`
 
 #### Membership
 
-- [ ] `GetMemberDetails`
+- [x] `GetMemberDetails`
 
 #### Lending
 

@@ -1,136 +1,43 @@
-use domain::{book::{Book, BookCreationPayload}, book_copy::{BookCopy, BookCopyCreationPayload, BookCopyError}};
-use std::sync::Arc;
 use anyhow::Context;
+use domain::{book::Book, book_copy::BookCopy};
+use std::sync::Arc;
 
-use crate::{
-    ports::{uow::WriteUnitOfWorkFactory},
-};
+use crate::ports::read_repos::CatalogReadRepoPort;
 
 #[derive(Clone)]
-pub struct CatalogCommands {
-    uow_factory: Arc<dyn WriteUnitOfWorkFactory>
+pub struct CatalogQueries {
+    catalog_read_repo: Arc<dyn CatalogReadRepoPort>,
 }
 
-impl CatalogCommands {
+impl CatalogQueries {
     #[must_use]
     pub fn new(
-        uow_factory: Arc<dyn WriteUnitOfWorkFactory>,
+        catalog_read_repo: Arc<dyn CatalogReadRepoPort>,
     ) -> Self {
-        Self {
-            uow_factory
-        }
+        Self { catalog_read_repo }
     }
 
-    pub async fn add_book(
+    pub async fn get_book_catalog(
         &self,
-        payload: BookCreationPayload,
-    ) -> Result<Book, anyhow::Error> {
-        let prepared = payload.prepare();
-        let uow = self.uow_factory.build().await.context("Failed to build unit of work")?;
-        let result = uow
-            .book_write_repo()
-            .create(&prepared)
+    ) -> anyhow::Result<Vec<Book>> {
+        let result = self
+            .catalog_read_repo
+            .get_book_catalog()
             .await
-            .context("Failed to add book")?;
-        uow.commit()
-            .await
-            .context("Failed to commit transaction")?;
+            .context("Failed to get book catalog")?;
 
         Ok(result)
     }
 
-    pub async fn add_book_copy(
+    pub async fn get_book_copy_details(
         &self,
-        payload: BookCopyCreationPayload,
-    ) -> Result<BookCopy, anyhow::Error> {
-        let prepared = payload.prepare();
-        let uow = self.uow_factory.build().await.context("Failed to build unit of work")?;
-        let result = uow
-            .book_copy_write_repo()
-            .create(&prepared)
+        book_copy_id: i64,
+    ) -> anyhow::Result<Option<BookCopy>> {
+        let result = self
+            .catalog_read_repo
+            .get_book_copy_details(book_copy_id)
             .await
-            .context("Failed to add book copy")?;
-        uow.commit()
-            .await
-            .context("Failed to commit transaction")?;
-
-        Ok(result)
-    }
-
-    pub async fn mark_book_copy_lost(
-        &self,
-        book_copy: BookCopy,
-    ) -> anyhow::Result<BookCopy> {
-
-        anyhow::ensure!(book_copy.can_be_marked_lost(), BookCopyError::CannotMarkBookLost);
-
-        let uow = self.uow_factory.build().await.context("Failed to build unit of work")?;
-        let result = uow
-            .book_copy_write_repo()
-            .update_status(book_copy.id, "lost")
-            .await
-            .context("Failed to mark book copy lost")?;
-        uow.commit()
-            .await
-            .context("Failed to commit transaction")?;
-
-        Ok(result)
-    }
-    pub async fn mark_book_copy_found(
-        &self,
-        book_copy: BookCopy,
-    ) -> anyhow::Result<BookCopy> {
-
-        anyhow::ensure!(book_copy.can_be_returned_from_lost(), BookCopyError::CannotBeReturnedFromLost);
-
-        let uow = self.uow_factory.build().await.context("Failed to build unit of work")?;
-        let result = uow
-            .book_copy_write_repo()
-            .update_status(book_copy.id, "active")
-            .await
-            .context("Failed to mark book copy found")?;
-        uow.commit()
-            .await
-            .context("Failed to commit transaction")?;
-
-        Ok(result)
-    }
-
-    pub async fn send_book_copy_to_maintenance(
-        &self,
-        book_copy: BookCopy,
-    ) -> anyhow::Result<BookCopy> {
-
-        anyhow::ensure!(book_copy.can_be_sent_to_maintenance(), BookCopyError::CannotBeSentToMaintenance);
-
-        let uow = self.uow_factory.build().await.context("Failed to build unit of work")?;
-        let result = uow
-            .book_copy_write_repo()
-            .update_status(book_copy.id, "maintenance")
-            .await
-            .context("Failed to send book copy to maintenance")?;
-        uow.commit()
-            .await
-            .context("Failed to commit transaction")?;
-
-        Ok(result)
-    }
-    pub async fn complete_book_copy_maintenance(
-        &self,
-        book_copy: BookCopy,
-    ) -> anyhow::Result<BookCopy> {
-
-        anyhow::ensure!(book_copy.can_be_returned_from_maintenance(), BookCopyError::CannotBeReturnedFromMaintenance);
-
-        let uow = self.uow_factory.build().await.context("Failed to build unit of work")?;
-        let result = uow
-            .book_copy_write_repo()
-            .update_status(book_copy.id, "active")
-            .await
-            .context("Failed to complete book copy maintenance")?;
-        uow.commit()
-            .await
-            .context("Failed to commit transaction")?;
+            .context("Failed to get book copy details")?;
 
         Ok(result)
     }
