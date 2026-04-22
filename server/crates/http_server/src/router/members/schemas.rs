@@ -22,7 +22,7 @@ pub struct MemberResponseBody {
 impl From<Member> for MemberResponseBody {
     fn from(value: Member) -> Self {
         Self {
-            ident: value.ident,
+            ident: value.ident.into(),
             dt_created: value.dt_created,
             dt_modified: value.dt_modified,
             status: member_status_text(&value.status),

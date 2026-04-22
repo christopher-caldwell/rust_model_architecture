@@ -5,7 +5,7 @@ use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use domain::{
     book_copy::BookCopyId,
-    loan::{port::LoanWriteRepoPort, Loan, LoanId, LoanPrepared},
+    loan::{port::LoanWriteRepoPort, Loan, LoanId, LoanIdent, LoanPrepared},
     member::MemberId,
 };
 use sqlx::{Postgres, Transaction};
@@ -34,11 +34,11 @@ impl TryFrom<LoanUpdatedDbRow> for Loan {
 
     fn try_from(value: LoanUpdatedDbRow) -> Result<Self> {
         Ok(Self {
-            id: LoanId(i64::from(value.loan_id)),
-            ident: value.loan_ident,
+            id: LoanId(value.loan_id),
+            ident: LoanIdent(value.loan_ident),
             dt_created: value.dt_created,
             dt_modified: value.dt_modified,
-            book_copy_id: BookCopyId(i64::from(value.book_copy_id)),
+            book_copy_id: BookCopyId(value.book_copy_id),
             member_id: MemberId(
                 value
                     .member_id
@@ -72,8 +72,8 @@ impl LoanWriteRepoPort for LoanWriteRepoTx {
         .context("Failed to create loan")?;
 
         Ok(Loan {
-            id: LoanId(i64::from(prepared_result.loan_id)),
-            ident: prepared_result.loan_ident,
+            id: LoanId(prepared_result.loan_id),
+            ident: LoanIdent(prepared_result.loan_ident),
             dt_created: Utc::now(),
             dt_modified: Utc::now(),
             book_copy_id: BookCopyId(insert.book_copy_id.0),

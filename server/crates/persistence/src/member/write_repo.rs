@@ -3,7 +3,9 @@ use std::sync::Arc;
 use anyhow::{Context, Result};
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
-use domain::member::{port::MemberWriteRepoPort, Member, MemberId, MemberPrepared, MemberStatus};
+use domain::member::{
+    port::MemberWriteRepoPort, Member, MemberId, MemberIdent, MemberPrepared, MemberStatus,
+};
 use sqlx::{Postgres, Transaction};
 use tokio::sync::Mutex;
 
@@ -30,13 +32,8 @@ impl TryFrom<MemberUpdatedDbRow> for Member {
 
     fn try_from(value: MemberUpdatedDbRow) -> Result<Self> {
         Ok(Self {
-            id: MemberId(
-                value
-                    .member_id
-                    .try_into()
-                    .context("member_id exceeds domain range")?,
-            ),
-            ident: value.member_ident,
+            id: MemberId(value.member_id),
+            ident: MemberIdent(value.member_ident),
             dt_created: value.dt_created,
             dt_modified: value.dt_modified,
             status: parse_member_status(&value.status)?,
@@ -58,7 +55,7 @@ impl MemberWriteRepoPort for MemberWriteRepoTx {
         let prepared_result = sqlx::query_file_as!(
             MemberPreparedResult,
             "sql/member/commands/create.sql",
-            insert.ident,
+            String::from(insert.ident.clone()),
             member_status_ident(&insert.status),
             insert.full_name,
             insert.max_active_loans,

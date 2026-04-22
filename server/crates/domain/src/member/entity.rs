@@ -2,11 +2,17 @@ use chrono::{DateTime, Utc};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[repr(transparent)]
-pub struct MemberId(pub i16);
+pub struct MemberId(pub i32);
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 #[repr(transparent)]
 pub struct MemberIdent(pub String);
+
+impl From<MemberIdent> for String {
+    fn from(value: MemberIdent) -> Self {
+        value.0
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum MemberStatus {
@@ -16,7 +22,7 @@ pub enum MemberStatus {
 
 pub struct Member {
     pub id: MemberId,
-    pub ident: String,
+    pub ident: MemberIdent,
     pub dt_created: DateTime<Utc>,
     pub dt_modified: DateTime<Utc>,
     pub status: MemberStatus,
@@ -30,7 +36,7 @@ pub struct MemberCreationPayload {
 }
 
 pub struct MemberPrepared {
-    pub ident: String,
+    pub ident: MemberIdent,
     pub full_name: String,
     pub max_active_loans: i16,
     pub status: MemberStatus,
@@ -53,8 +59,8 @@ impl Member {
     }
 
     #[must_use]
-    pub fn can_check_out_more_books(&self, active_loan_count: i64) -> bool {
-        active_loan_count < i64::from(self.max_active_loans)
+    pub fn can_check_out_more_books(&self, active_loan_count: i16) -> bool {
+        active_loan_count < self.max_active_loans
     }
 }
 
@@ -72,7 +78,7 @@ pub enum MemberError {
 
 impl MemberCreationPayload {
     #[must_use]
-    pub fn prepare(self, ident: String) -> MemberPrepared {
+    pub fn prepare(self, ident: MemberIdent) -> MemberPrepared {
         MemberPrepared {
             ident,
             full_name: self.full_name,

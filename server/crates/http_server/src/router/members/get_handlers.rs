@@ -2,6 +2,7 @@ use axum::{
     extract::{Path, State},
     Json,
 };
+use domain::member::MemberIdent;
 
 use crate::router::{
     auth::AuthUser,
@@ -32,7 +33,11 @@ pub async fn get_member_by_id(
     State(deps): State<ServerDeps>,
     Path(ident): Path<String>,
 ) -> Result<Json<MemberResponseBody>, ApiError> {
-    let member_result = deps.membership.queries.get_member_details(&ident).await;
+    let member_result = deps
+        .membership
+        .queries
+        .get_member_details(&MemberIdent(ident))
+        .await;
 
     let member = match member_result {
         Ok(Some(member)) => member,
@@ -63,7 +68,11 @@ pub async fn get_member_loans(
     State(deps): State<ServerDeps>,
     Path(ident): Path<String>,
 ) -> Result<Json<Vec<LoanResponseBody>>, ApiError> {
-    let member_loans_result = deps.lending.queries.get_member_loans(&ident).await;
+    let member_loans_result = deps
+        .lending
+        .queries
+        .get_member_loans(&MemberIdent(ident))
+        .await;
 
     let member_loans = match member_loans_result {
         Ok(loans) => loans,

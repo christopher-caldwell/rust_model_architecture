@@ -1,5 +1,5 @@
 use anyhow::Context;
-use domain::member::{port::MemberReadRepoPort, Member};
+use domain::member::{port::MemberReadRepoPort, Member, MemberIdent};
 use std::sync::Arc;
 
 #[derive(Clone)]
@@ -13,7 +13,7 @@ impl MembershipQueries {
         Self { member_read_repo }
     }
 
-    pub async fn get_member_details(&self, ident: &str) -> anyhow::Result<Option<Member>> {
+    pub async fn get_member_details(&self, ident: &MemberIdent) -> anyhow::Result<Option<Member>> {
         self.member_read_repo
             .get_by_ident(ident)
             .await

@@ -43,7 +43,7 @@ impl LendingCommands {
             .await
             .context("Failed to count active loans for member")?;
         anyhow::ensure!(
-            member.can_check_out_more_books(active_loan_count),
+            member.can_check_out_more_books(active_loan_count as i16),
             MemberError::LoanLimitReached
         );
 

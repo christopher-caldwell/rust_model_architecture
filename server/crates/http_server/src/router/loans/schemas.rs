@@ -19,7 +19,7 @@ pub struct LoanResponseBody {
 impl From<Loan> for LoanResponseBody {
     fn from(value: Loan) -> Self {
         Self {
-            ident: value.ident,
+            ident: value.ident.into(),
             dt_created: value.dt_created,
             dt_modified: value.dt_modified,
             dt_due: value.dt_due,

@@ -4,15 +4,31 @@ use crate::{book_copy::BookCopyId, member::MemberId};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[repr(transparent)]
-pub struct LoanId(pub i64);
+pub struct LoanId(pub i32);
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 #[repr(transparent)]
 pub struct LoanIdent(pub String);
 
+impl From<LoanIdent> for String {
+    fn from(value: LoanIdent) -> Self {
+        value.0
+    }
+}
+
+// impl TryFrom<String> for MemberIdent {
+//     type Error = anyhow::Error;
+
+//     fn try_from(value: String) -> Result<Self, Self::Error> {
+//         anyhow::ensure!(value.len() == 10, "ident must be 10 characters");
+//         Ok(Self(value))
+//     }
+// }
+// let ident = MemberIdent::try_from(path_param)?;
+
 pub struct Loan {
     pub id: LoanId,
-    pub ident: String,
+    pub ident: LoanIdent,
     pub dt_created: DateTime<Utc>,
     pub dt_modified: DateTime<Utc>,
     pub book_copy_id: BookCopyId,

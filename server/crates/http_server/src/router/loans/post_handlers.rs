@@ -1,4 +1,5 @@
 use axum::{extract::State, http::StatusCode, Json};
+use domain::member::MemberIdent;
 
 use crate::router::{
     auth::AuthUser,
@@ -30,7 +31,7 @@ pub async fn create_loan(
     let member_result = deps
         .membership
         .queries
-        .get_member_details(&body.member_ident)
+        .get_member_details(&MemberIdent(body.member_ident.clone()))
         .await;
 
     let member = match member_result {

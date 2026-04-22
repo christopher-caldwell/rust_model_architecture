@@ -25,7 +25,7 @@ impl TryFrom<BookCopyDbRow> for BookCopy {
 
     fn try_from(value: BookCopyDbRow) -> Result<Self> {
         Ok(Self {
-            id: BookCopyId(i64::from(value.book_copy_id)),
+            id: BookCopyId(value.book_copy_id),
             barcode: value.barcode,
             dt_created: value.dt_created,
             dt_modified: value.dt_modified,

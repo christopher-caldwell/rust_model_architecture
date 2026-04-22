@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
-use domain::member::{port::MemberReadRepoPort, Member, MemberId};
+use domain::member::{port::MemberReadRepoPort, Member, MemberId, MemberIdent};
 use sqlx::PgPool;
 
 use crate::member::parse_member_status;
@@ -28,7 +28,7 @@ impl TryFrom<MemberDbRow> for Member {
                     .try_into()
                     .context("member_id exceeds domain range")?,
             ),
-            ident: value.member_ident,
+            ident: MemberIdent(value.member_ident),
             dt_created: value.dt_created,
             dt_modified: value.dt_modified,
             status: parse_member_status(&value.status)?,
@@ -57,11 +57,16 @@ impl MemberReadRepoPort for MemberReadRepoSql {
         row.map(Member::try_from).transpose()
     }
 
-    async fn get_by_ident(&self, ident: &str) -> Result<Option<Member>> {
-        let row = sqlx::query_file_as!(MemberDbRow, "sql/member/queries/get_by_ident.sql", ident)
-            .fetch_optional(&self.pool)
-            .await
-            .context("Failed to fetch member by ident")?;
+    async fn get_by_ident(&self, ident: &MemberIdent) -> Result<Option<Member>> {
+        let ident_str: String = ident.clone().into();
+        let row = sqlx::query_file_as!(
+            MemberDbRow,
+            "sql/member/queries/get_by_ident.sql",
+            ident_str
+        )
+        .fetch_optional(&self.pool)
+        .await
+        .context("Failed to fetch member by ident")?;
 
         row.map(Member::try_from).transpose()
     }

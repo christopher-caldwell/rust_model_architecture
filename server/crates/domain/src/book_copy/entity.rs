@@ -4,7 +4,7 @@ use crate::book::BookId;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[repr(transparent)]
-pub struct BookCopyId(pub i64);
+pub struct BookCopyId(pub i32);
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum BookCopyStatus {

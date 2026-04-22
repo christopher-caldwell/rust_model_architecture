@@ -2,7 +2,7 @@ use chrono::{DateTime, Utc};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[repr(transparent)]
-pub struct BookId(pub i16);
+pub struct BookId(pub i32);
 
 pub struct Book {
     pub id: BookId,

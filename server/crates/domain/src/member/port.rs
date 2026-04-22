@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 
-use super::{Member, MemberId, MemberPrepared, MemberStatus};
+use super::{Member, MemberId, MemberIdent, MemberPrepared, MemberStatus};
 
 #[async_trait]
 pub trait MemberWriteRepoPort: Send + Sync {
@@ -11,5 +11,5 @@ pub trait MemberWriteRepoPort: Send + Sync {
 #[async_trait]
 pub trait MemberReadRepoPort: Send + Sync {
     async fn get_by_id(&self, id: MemberId) -> anyhow::Result<Option<Member>>;
-    async fn get_by_ident(&self, ident: &str) -> anyhow::Result<Option<Member>>;
+    async fn get_by_ident(&self, ident: &MemberIdent) -> anyhow::Result<Option<Member>>;
 }

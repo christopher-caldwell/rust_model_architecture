@@ -35,7 +35,7 @@ impl TryFrom<BookCopyUpdatedDbRow> for BookCopy {
 
     fn try_from(value: BookCopyUpdatedDbRow) -> Result<Self> {
         Ok(Self {
-            id: BookCopyId(i64::from(value.book_copy_id)),
+            id: BookCopyId(value.book_copy_id),
             barcode: value.barcode,
             dt_created: value.dt_created,
             dt_modified: value.dt_modified,
@@ -72,7 +72,7 @@ impl BookCopyWriteRepoPort for BookCopyWriteRepoTx {
         .context("Failed to create book copy")?;
 
         Ok(BookCopy {
-            id: BookCopyId(i64::from(prepared_result.book_copy_id)),
+            id: BookCopyId(prepared_result.book_copy_id),
             barcode: insert.barcode.clone(),
             dt_created: Utc::now(),
             dt_modified: Utc::now(),

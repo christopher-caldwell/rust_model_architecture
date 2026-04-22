@@ -5,8 +5,8 @@ use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use domain::{
     book_copy::BookCopyId,
-    loan::{port::LoanReadRepoPort, Loan, LoanId},
-    member::MemberId,
+    loan::{port::LoanReadRepoPort, Loan, LoanId, LoanIdent},
+    member::{MemberId, MemberIdent},
 };
 use sqlx::{Executor, PgPool, Postgres, Transaction};
 use tokio::sync::Mutex;
@@ -33,11 +33,11 @@ impl TryFrom<LoanDbRow> for Loan {
 
     fn try_from(value: LoanDbRow) -> Result<Self> {
         Ok(Self {
-            id: LoanId(i64::from(value.loan_id)),
-            ident: value.loan_ident,
+            id: LoanId(value.loan_id),
+            ident: LoanIdent(value.loan_ident),
             dt_created: value.dt_created,
             dt_modified: value.dt_modified,
-            book_copy_id: BookCopyId(i64::from(value.book_copy_id)),
+            book_copy_id: BookCopyId(value.book_copy_id),
             member_id: MemberId(
                 value
                     .member_id
@@ -50,14 +50,19 @@ impl TryFrom<LoanDbRow> for Loan {
     }
 }
 
-async fn get_by_member_ident_with<'e, E>(executor: E, ident: &str) -> Result<Vec<Loan>>
+async fn get_by_member_ident_with<'e, E>(executor: E, ident: &MemberIdent) -> Result<Vec<Loan>>
 where
     E: Executor<'e, Database = Postgres>,
 {
-    let rows = sqlx::query_file_as!(LoanDbRow, "sql/loan/queries/get_by_member_ident.sql", ident)
-        .fetch_all(executor)
-        .await
-        .context("Failed to fetch loans by member ident")?;
+    let ident_str: String = ident.clone().into();
+    let rows = sqlx::query_file_as!(
+        LoanDbRow,
+        "sql/loan/queries/get_by_member_ident.sql",
+        ident_str
+    )
+    .fetch_all(executor)
+    .await
+    .context("Failed to fetch loans by member ident")?;
 
     rows.into_iter().map(Loan::try_from).collect()
 }
@@ -119,7 +124,7 @@ pub struct LoanReadRepoTx {
 
 #[async_trait]
 impl LoanReadRepoPort for LoanReadRepoSql {
-    async fn get_by_member_ident(&self, ident: &str) -> Result<Vec<Loan>> {
+    async fn get_by_member_ident(&self, ident: &MemberIdent) -> Result<Vec<Loan>> {
         get_by_member_ident_with(&self.pool, ident).await
     }
 
@@ -138,7 +143,7 @@ impl LoanReadRepoPort for LoanReadRepoSql {
 
 #[async_trait]
 impl LoanReadRepoPort for LoanReadRepoTx {
-    async fn get_by_member_ident(&self, ident: &str) -> Result<Vec<Loan>> {
+    async fn get_by_member_ident(&self, ident: &MemberIdent) -> Result<Vec<Loan>> {
         let mut guard = self.tx.lock().await;
         let tx = guard.as_mut().context("Transaction already consumed")?;
         get_by_member_ident_with(&mut **tx, ident).await

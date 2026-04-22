@@ -1,6 +1,6 @@
 use anyhow::Context;
 use domain::{
-    member::{Member, MemberCreationPayload, MemberError, MemberStatus},
+    member::{Member, MemberCreationPayload, MemberError, MemberIdent, MemberStatus},
     uow::WriteUnitOfWorkFactory,
 };
 use std::sync::Arc;
@@ -49,7 +49,7 @@ impl MembershipCommands {
         &self,
         payload: MemberCreationPayload,
     ) -> Result<Member, anyhow::Error> {
-        let ident = self.ident_generator.gen();
+        let ident = MemberIdent(self.ident_generator.gen());
         let prepared = payload.prepare(ident);
         let uow = self
             .uow_factory

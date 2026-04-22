@@ -2,6 +2,7 @@ use axum::{
     extract::{Path, State},
     Json,
 };
+use domain::member::MemberIdent;
 
 use crate::router::{
     auth::AuthUser,
@@ -32,7 +33,11 @@ pub async fn suspend_member(
     State(deps): State<ServerDeps>,
     Path(ident): Path<String>,
 ) -> Result<Json<MemberResponseBody>, ApiError> {
-    let member_result = deps.membership.queries.get_member_details(&ident).await;
+    let member_result = deps
+        .membership
+        .queries
+        .get_member_details(&MemberIdent(ident))
+        .await;
 
     let member = match member_result {
         Ok(Some(member)) => member,
