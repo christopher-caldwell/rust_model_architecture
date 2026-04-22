@@ -33,16 +33,19 @@ pub async fn get_member_by_id(
     State(deps): State<ServerDeps>,
     Path(id): Path<i16>,
 ) -> Result<Json<MemberResponseBody>, ApiError> {
-    match deps
+    let member_result = deps
         .membership
         .queries
         .get_member_details(MemberId(id))
-        .await
-    {
-        Ok(Some(member)) => Ok(Json(MemberResponseBody::from(member))),
-        Ok(None) => Err(not_found("Member not found")),
-        Err(error) => Err(service_error(error)),
-    }
+        .await;
+
+    let member = match member_result {
+        Ok(Some(member)) => member,
+        Ok(None) => return Err(not_found("Member not found")),
+        Err(error) => return Err(service_error(error)),
+    };
+
+    Ok(Json(MemberResponseBody::from(member)))
 }
 
 #[utoipa::path(
@@ -65,10 +68,20 @@ pub async fn get_member_loans(
     State(deps): State<ServerDeps>,
     Path(id): Path<i16>,
 ) -> Result<Json<Vec<LoanResponseBody>>, ApiError> {
-    deps.lending
+    let member_loans_result = deps.lending
         .queries
         .get_member_loans(MemberId(id))
-        .await
-        .map(|loans| Json(loans.into_iter().map(LoanResponseBody::from).collect()))
-        .map_err(service_error)
+        .await;
+
+    let member_loans = match member_loans_result {
+        Ok(loans) => loans,
+        Err(error) => return Err(service_error(error)),
+    };
+
+    let member_loans_response = member_loans
+        .into_iter()
+        .map(LoanResponseBody::from)
+        .collect();
+
+    Ok(Json(member_loans_response))
 }

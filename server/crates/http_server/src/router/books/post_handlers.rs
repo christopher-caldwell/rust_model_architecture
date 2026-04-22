@@ -33,12 +33,17 @@ pub async fn create_book(
     State(deps): State<ServerDeps>,
     Json(body): Json<CreateBookRequestBody>,
 ) -> Result<(StatusCode, Json<BookResponseBody>), ApiError> {
-    deps.catalog
+    let add_book_result = deps.catalog
         .commands
         .add_book(body.into())
-        .await
-        .map(|book| (StatusCode::CREATED, Json(BookResponseBody::from(book))))
-        .map_err(service_error)
+        .await;
+
+    let book_response = match add_book_result {
+        Ok(book) => Json(BookResponseBody::from(book)),
+        Err(error) => return Err(service_error(error)),
+    };
+
+    Ok((StatusCode::CREATED, book_response))
 }
 
 #[utoipa::path(
@@ -69,15 +74,15 @@ pub async fn create_book_copy(
         book_id: BookId(book_id),
     };
 
-    deps.catalog
+    let add_book_copy_result = deps.catalog
         .commands
         .add_book_copy(payload)
-        .await
-        .map(|book_copy| {
-            (
-                StatusCode::CREATED,
-                Json(BookCopyResponseBody::from(book_copy)),
-            )
-        })
-        .map_err(service_error)
+        .await;
+
+    let book_copy_response = match add_book_copy_result {
+        Ok(book_copy) => Json(BookCopyResponseBody::from(book_copy)),
+        Err(error) => return Err(service_error(error)),
+    };
+
+    Ok((StatusCode::CREATED, book_copy_response))
 }

@@ -33,21 +33,27 @@ pub async fn reactivate_member(
     State(deps): State<ServerDeps>,
     Path(id): Path<i16>,
 ) -> Result<Json<MemberResponseBody>, ApiError> {
-    let member = match deps
+    let member_result = deps
         .membership
         .queries
         .get_member_details(MemberId(id))
-        .await
-    {
+        .await;
+
+    let member = match member_result {
         Ok(Some(member)) => member,
         Ok(None) => return Err(not_found("Member not found")),
         Err(error) => return Err(service_error(error)),
     };
 
-    deps.membership
+    let reactivate_member_result = deps.membership
         .commands
         .reactivate_member(member)
-        .await
-        .map(|updated| Json(MemberResponseBody::from(updated)))
-        .map_err(service_error)
+        .await;
+
+    let member_response = match reactivate_member_result {
+        Ok(updated) => Json(MemberResponseBody::from(updated)),
+        Err(error) => return Err(service_error(error)),
+    };
+
+    Ok(member_response)
 }

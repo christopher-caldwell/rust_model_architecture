@@ -34,23 +34,29 @@ pub async fn return_book_copy(
     State(deps): State<ServerDeps>,
     Path(id): Path<i64>,
 ) -> Result<Json<LoanResponseBody>, ApiError> {
-    let book_copy = match deps
+    let book_copy_result = deps
         .catalog
         .queries
         .get_book_copy_details(BookCopyId(id))
-        .await
-    {
+        .await;
+
+    let book_copy = match book_copy_result {
         Ok(Some(book_copy)) => book_copy,
         Ok(None) => return Err(not_found("Book copy not found")),
         Err(error) => return Err(service_error(error)),
     };
 
-    deps.lending
+    let return_book_copy_result = deps.lending
         .commands
         .return_book_copy(book_copy)
-        .await
-        .map(|loan| Json(LoanResponseBody::from(loan)))
-        .map_err(service_error)
+        .await;
+
+    let loan_response = match return_book_copy_result {
+        Ok(loan) => Json(LoanResponseBody::from(loan)),
+        Err(error) => return Err(service_error(error)),
+    };
+
+    Ok(loan_response)
 }
 
 #[utoipa::path(
@@ -75,21 +81,27 @@ pub async fn report_book_copy_lost_on_loan(
     State(deps): State<ServerDeps>,
     Path(id): Path<i64>,
 ) -> Result<Json<BookCopyResponseBody>, ApiError> {
-    let book_copy = match deps
+    let book_copy_result = deps
         .catalog
         .queries
         .get_book_copy_details(BookCopyId(id))
-        .await
-    {
+        .await;
+
+    let book_copy = match book_copy_result {
         Ok(Some(book_copy)) => book_copy,
         Ok(None) => return Err(not_found("Book copy not found")),
         Err(error) => return Err(service_error(error)),
     };
 
-    deps.lending
+    let report_lost_loaned_book_copy_result = deps.lending
         .commands
         .report_lost_loaned_book_copy(book_copy)
-        .await
-        .map(|updated| Json(BookCopyResponseBody::from(updated)))
-        .map_err(service_error)
+        .await;
+
+    let book_copy_response = match report_lost_loaned_book_copy_result {
+        Ok(updated) => Json(BookCopyResponseBody::from(updated)),
+        Err(error) => return Err(service_error(error)),
+    };
+
+    Ok(book_copy_response)
 }

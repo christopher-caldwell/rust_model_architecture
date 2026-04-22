@@ -16,7 +16,7 @@ use crate::router::{
     path = "/{id}",
     tag = BOOK_COPIES_TAG,
     params(
-        ("id" = i64, Path, description = "Identifier for the book copy")
+        ("id" = i64, Path, description = "Database identifier for the book copy")
     ),
     responses(
         (status = 200, description = "Book copy details", body = BookCopyResponseBody),
@@ -32,14 +32,17 @@ pub async fn get_book_copy_by_id(
     State(deps): State<ServerDeps>,
     Path(id): Path<i64>,
 ) -> Result<Json<BookCopyResponseBody>, ApiError> {
-    match deps
+    let book_copy_result = deps
         .catalog
         .queries
         .get_book_copy_details(BookCopyId(id))
-        .await
-    {
-        Ok(Some(book_copy)) => Ok(Json(BookCopyResponseBody::from(book_copy))),
-        Ok(None) => Err(not_found("Book copy not found")),
-        Err(error) => Err(service_error(error)),
-    }
+        .await;
+
+    let book_copy_response = match book_copy_result {
+        Ok(Some(book_copy)) => BookCopyResponseBody::from(book_copy),
+        Ok(None) => return Err(not_found("Book copy not found")),
+        Err(error) => return Err(service_error(error)),
+    };
+
+    Ok(Json(book_copy_response))
 }
