@@ -1,0 +1,62 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n      l.loan_id\n    , l.loan_ident\n    , l.dt_created\n    , l.dt_modified\n    , l.book_copy_id\n    , l.member_id\n    , NULLIF(l.dt_due, '9999-01-01 00:00:00+00'::TIMESTAMPTZ) AS dt_due\n    , NULLIF(l.dt_returned, '9999-01-01 00:00:00+00'::TIMESTAMPTZ) AS dt_returned\nFROM\n    library.loan l\nWHERE\n    l.dt_returned = '9999-01-01 00:00:00+00'::TIMESTAMPTZ\nAND\n    l.dt_due < CURRENT_TIMESTAMP\nORDER BY\n      l.dt_due\n    , l.loan_id\n;\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "loan_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "loan_ident",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "dt_created",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 3,
+        "name": "dt_modified",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 4,
+        "name": "book_copy_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "member_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "dt_due",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 7,
+        "name": "dt_returned",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "1f6d0da203873803f61cfaa9bd00a8bc60b61456b9ad14f51408a25e1590a872"
+}

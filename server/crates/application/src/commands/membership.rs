@@ -19,7 +19,10 @@ impl MembershipCommands {
         uow_factory: Arc<dyn WriteUnitOfWorkFactory>,
         ident_generator: Arc<dyn IdentGeneratorPort>,
     ) -> Self {
-        Self { uow_factory, ident_generator }
+        Self {
+            uow_factory,
+            ident_generator,
+        }
     }
 
     async fn change_member_status(
@@ -28,7 +31,11 @@ impl MembershipCommands {
         new_status: MemberStatus,
         added_context: &'static str,
     ) -> anyhow::Result<Member> {
-        let uow = self.uow_factory.build().await.context("Failed to build unit of work")?;
+        let uow = self
+            .uow_factory
+            .build()
+            .await
+            .context("Failed to build unit of work")?;
         let result = uow
             .membership_write_repo()
             .update_status(member.id, new_status)
@@ -44,7 +51,11 @@ impl MembershipCommands {
     ) -> Result<Member, anyhow::Error> {
         let ident = self.ident_generator.gen();
         let prepared = payload.prepare(ident);
-        let uow = self.uow_factory.build().await.context("Failed to build unit of work")?;
+        let uow = self
+            .uow_factory
+            .build()
+            .await
+            .context("Failed to build unit of work")?;
         let result = uow
             .membership_write_repo()
             .create(&prepared)
@@ -56,11 +67,16 @@ impl MembershipCommands {
 
     pub async fn suspend_member(&self, member: Member) -> anyhow::Result<Member> {
         anyhow::ensure!(member.can_be_suspended(), MemberError::CannotBeSuspended);
-        self.change_member_status(member, MemberStatus::Suspended, "Failed to suspend member").await
+        self.change_member_status(member, MemberStatus::Suspended, "Failed to suspend member")
+            .await
     }
 
     pub async fn reactivate_member(&self, member: Member) -> anyhow::Result<Member> {
-        anyhow::ensure!(member.can_be_reactivated(), MemberError::CannotBeReactivated);
-        self.change_member_status(member, MemberStatus::Active, "Failed to reactivate member").await
+        anyhow::ensure!(
+            member.can_be_reactivated(),
+            MemberError::CannotBeReactivated
+        );
+        self.change_member_status(member, MemberStatus::Active, "Failed to reactivate member")
+            .await
     }
 }

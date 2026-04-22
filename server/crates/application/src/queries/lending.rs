@@ -1,6 +1,6 @@
 use anyhow::Context;
 use domain::{
-    loan::{Loan, port::LoanReadRepoPort},
+    loan::{port::LoanReadRepoPort, Loan},
     member::MemberId,
 };
 use std::sync::Arc;

@@ -1,0 +1,58 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n      m.member_id\n    , m.member_ident\n    , m.dt_created\n    , m.dt_modified\n    , st.att_pub_ident \"status\"\n    , m.full_name\n    , m.max_active_loans\nFROM\n    library.member m\nJOIN\n    library.struct_type st\nON\n    m.status_id = st.struct_type_id\nWHERE\n    m.member_id = $1\nAND\n    st.group_name = 'member_status'\nAND\n    st.att_pub_ident IN ('active', 'suspended')\n;\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "member_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "member_ident",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "dt_created",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 3,
+        "name": "dt_modified",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 4,
+        "name": "status",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "full_name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "max_active_loans",
+        "type_info": "Int2"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "45e9956da8aa3e0cbe2ac54e8f39b411efc7e4225a83e2c436eef7300bbcbf07"
+}

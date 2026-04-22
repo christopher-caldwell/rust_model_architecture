@@ -1,0 +1,59 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH updated AS (\n    UPDATE library.book_copy bc\n    SET\n        status_id = (\n            SELECT st.struct_type_id\n            FROM library.struct_type st\n            WHERE st.group_name = 'book_copy_status'\n              AND st.att_pub_ident = $2\n        )\n    WHERE\n        bc.book_copy_id = $1\n    RETURNING\n          bc.book_copy_id\n        , bc.barcode\n        , bc.dt_created\n        , bc.dt_modified\n        , bc.book_id\n        , bc.status_id\n)\nSELECT\n      updated.book_copy_id\n    , updated.barcode\n    , updated.dt_created\n    , updated.dt_modified\n    , updated.book_id\n    , b.author_name\n    , st.att_pub_ident \"status\"\nFROM\n    updated\nJOIN\n    library.book b\nON\n    updated.book_id = b.book_id\nJOIN\n    library.struct_type st\nON\n    updated.status_id = st.struct_type_id\n;\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "book_copy_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "barcode",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "dt_created",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 3,
+        "name": "dt_modified",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 4,
+        "name": "book_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "author_name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "status",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "0742010bf7e067981ba5b2aeefeba2cadf8ce50c250461353df4f9599b828521"
+}

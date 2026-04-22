@@ -1,0 +1,64 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH updated AS (\n    UPDATE library.loan l\n    SET\n        dt_returned = CURRENT_TIMESTAMP\n    WHERE\n        l.loan_id = $1\n    RETURNING\n          l.loan_id\n        , l.loan_ident\n        , l.dt_created\n        , l.dt_modified\n        , l.book_copy_id\n        , l.member_id\n        , NULLIF(l.dt_due, '9999-01-01 00:00:00+00'::TIMESTAMPTZ) AS dt_due\n        , NULLIF(l.dt_returned, '9999-01-01 00:00:00+00'::TIMESTAMPTZ) AS dt_returned\n)\nSELECT\n      updated.loan_id\n    , updated.loan_ident\n    , updated.dt_created\n    , updated.dt_modified\n    , updated.book_copy_id\n    , updated.member_id\n    , updated.dt_due\n    , updated.dt_returned\nFROM\n    updated\n;\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "loan_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "loan_ident",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "dt_created",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 3,
+        "name": "dt_modified",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 4,
+        "name": "book_copy_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "member_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "dt_due",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 7,
+        "name": "dt_returned",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "53a84dcbeaec96e27011c6b1114e7cff6bbcfb58a01b3a2c1884aa37e3e6d007"
+}

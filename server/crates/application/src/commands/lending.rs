@@ -26,16 +26,26 @@ impl LendingCommands {
         anyhow::ensure!(member.can_borrow(), MemberError::CannotBorrowWhileSuspended);
         anyhow::ensure!(book_copy.can_be_borrowed(), BookCopyError::CannotBeBorrowed);
 
-        let payload = LoanCreationPayload { member_id: member.id, book_copy_id: book_copy.id };
+        let payload = LoanCreationPayload {
+            member_id: member.id,
+            book_copy_id: book_copy.id,
+        };
         let prepared = payload.prepare();
-        let uow = self.uow_factory.build().await.context("Failed to build unit of work")?;
+        let uow = self
+            .uow_factory
+            .build()
+            .await
+            .context("Failed to build unit of work")?;
 
         let active_loan_count = uow
             .loan_read_repo()
             .count_active_by_member_id(member.id)
             .await
             .context("Failed to count active loans for member")?;
-        anyhow::ensure!(member.can_check_out_more_books(active_loan_count), MemberError::LoanLimitReached);
+        anyhow::ensure!(
+            member.can_check_out_more_books(active_loan_count),
+            MemberError::LoanLimitReached
+        );
 
         let active_loan = uow
             .loan_read_repo()
@@ -54,7 +64,11 @@ impl LendingCommands {
     }
 
     pub async fn return_book_copy(&self, book_copy: BookCopy) -> anyhow::Result<Loan> {
-        let uow = self.uow_factory.build().await.context("Failed to build unit of work")?;
+        let uow = self
+            .uow_factory
+            .build()
+            .await
+            .context("Failed to build unit of work")?;
         let loan = uow
             .loan_read_repo()
             .find_active_by_book_copy_id(book_copy.id)
@@ -75,8 +89,15 @@ impl LendingCommands {
         &self,
         book_copy: BookCopy,
     ) -> anyhow::Result<BookCopy> {
-        anyhow::ensure!(book_copy.can_be_marked_lost(), BookCopyError::CannotMarkBookLost);
-        let uow = self.uow_factory.build().await.context("Failed to build unit of work")?;
+        anyhow::ensure!(
+            book_copy.can_be_marked_lost(),
+            BookCopyError::CannotMarkBookLost
+        );
+        let uow = self
+            .uow_factory
+            .build()
+            .await
+            .context("Failed to build unit of work")?;
         let loan = uow
             .loan_read_repo()
             .find_active_by_book_copy_id(book_copy.id)

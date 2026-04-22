@@ -5,8 +5,8 @@ pub mod schemas;
 pub use get_handlers::{get_contact_inquiries, get_contact_inquiry_by_ident};
 pub use post_handlers::create_contact_inquiry;
 pub use schemas::{
-    ContactInquiryResponseBody, CreateContactInquiryRequestBody, CONTACT_INQUIRY_BY_IDENT_PATH,
-    CONTACT_INQUIRIES_PATH, CONTACT_INQUIRIES_TAG,
+    ContactInquiryResponseBody, CreateContactInquiryRequestBody, CONTACT_INQUIRIES_PATH,
+    CONTACT_INQUIRIES_TAG, CONTACT_INQUIRY_BY_IDENT_PATH,
 };
 
 use utoipa::OpenApi;

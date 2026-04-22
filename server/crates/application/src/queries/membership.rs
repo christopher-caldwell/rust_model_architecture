@@ -1,5 +1,5 @@
 use anyhow::Context;
-use domain::member::{Member, MemberId, port::MemberReadRepoPort};
+use domain::member::{port::MemberReadRepoPort, Member, MemberId};
 use std::sync::Arc;
 
 #[derive(Clone)]

@@ -1,28 +1,52 @@
 use std::sync::Arc;
 
-use crate::contact_inquiry::write_repo::ContactInquiryWriteRepoTx;
-use application::contact_inquiry::ContactInquiryWriteRepoPort;
-use application::uow_port::{UnitOfWorkPort, WriteUnitOfWorkFactory};
+use anyhow::Context;
 use async_trait::async_trait;
+use domain::uow::{UnitOfWorkPort, WriteUnitOfWorkFactory};
 use sqlx::{PgPool, Postgres, Transaction};
 use tokio::sync::Mutex;
-use anyhow::Context;
+
+use crate::{
+    book::write_repo::BookWriteRepoTx,
+    book_copy::write_repo::BookCopyWriteRepoTx,
+    loan::{read_repo::LoanReadRepoTx, write_repo::LoanWriteRepoTx},
+    member::write_repo::MemberWriteRepoTx,
+};
 
 pub struct SqlUnitOfWork {
     tx: Arc<Mutex<Option<Transaction<'static, Postgres>>>>,
-    contact_inquiry_write_repo: ContactInquiryWriteRepoTx,
+    book_write_repo: BookWriteRepoTx,
+    book_copy_write_repo: BookCopyWriteRepoTx,
+    membership_write_repo: MemberWriteRepoTx,
+    loan_write_repo: LoanWriteRepoTx,
+    loan_read_repo: LoanReadRepoTx,
 }
 
 #[async_trait]
 impl UnitOfWorkPort for SqlUnitOfWork {
-    fn contact_inquiry_write_repo(&self) -> &dyn ContactInquiryWriteRepoPort {
-        &self.contact_inquiry_write_repo
+    fn book_write_repo(&self) -> &dyn domain::book::port::BookWriteRepoPort {
+        &self.book_write_repo
     }
+
+    fn book_copy_write_repo(&self) -> &dyn domain::book_copy::port::BookCopyWriteRepoPort {
+        &self.book_copy_write_repo
+    }
+
+    fn membership_write_repo(&self) -> &dyn domain::member::port::MemberWriteRepoPort {
+        &self.membership_write_repo
+    }
+
+    fn loan_write_repo(&self) -> &dyn domain::loan::port::LoanWriteRepoPort {
+        &self.loan_write_repo
+    }
+
+    fn loan_read_repo(&self) -> &dyn domain::loan::port::LoanReadRepoPort {
+        &self.loan_read_repo
+    }
+
     async fn commit(self: Box<Self>) -> anyhow::Result<()> {
         let mut guard = self.tx.lock().await;
-        let tx = guard
-            .take()
-            .context("Transaction already consumed")?;
+        let tx = guard.take().context("Transaction already consumed")?;
         tx.commit().await.context("Failed to commit transaction")
     }
 }
@@ -42,7 +66,11 @@ impl WriteUnitOfWorkFactory for SqlWriteUnitOfWorkFactory {
         let tx = Arc::new(Mutex::new(Some(tx)));
         Ok(Box::new(SqlUnitOfWork {
             tx: tx.clone(),
-            contact_inquiry_write_repo: ContactInquiryWriteRepoTx { tx },
+            book_write_repo: BookWriteRepoTx { tx: tx.clone() },
+            book_copy_write_repo: BookCopyWriteRepoTx { tx: tx.clone() },
+            membership_write_repo: MemberWriteRepoTx { tx: tx.clone() },
+            loan_write_repo: LoanWriteRepoTx { tx: tx.clone() },
+            loan_read_repo: LoanReadRepoTx { tx },
         }))
     }
 }

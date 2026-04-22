@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH next_id AS (\n    SELECT\n        nextval(pg_get_serial_sequence('library.loan', 'loan_id'))::integer AS loan_id\n), inserted AS (\n    INSERT INTO library.loan (loan_id, loan_ident, book_copy_id, member_id)\n    OVERRIDING SYSTEM VALUE\n    SELECT\n          next_id.loan_id\n        , 'LN-' || lpad(next_id.loan_id::text, 6, '0')\n        , $1\n        , $2\n    FROM\n        next_id\n    RETURNING\n          loan_id\n        , loan_ident\n)\nSELECT\n      inserted.loan_id\n    , inserted.loan_ident\nFROM\n    inserted\n;\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "loan_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "loan_ident",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "16dc4b281c06cef9b667b1c687f889c0b0f36c271e9d04b4dee76e0b7545029c"
+}

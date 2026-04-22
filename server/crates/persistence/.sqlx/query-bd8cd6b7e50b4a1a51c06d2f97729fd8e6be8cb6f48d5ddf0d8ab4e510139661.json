@@ -1,0 +1,59 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH updated AS (\n    UPDATE library.member m\n    SET\n        status_id = (\n            SELECT st.struct_type_id\n            FROM library.struct_type st\n            WHERE st.group_name = 'member_status'\n              AND st.att_pub_ident = $2\n        )\n    WHERE\n        m.member_id = $1\n    RETURNING\n          m.member_id\n        , m.member_ident\n        , m.dt_created\n        , m.dt_modified\n        , m.full_name\n        , m.max_active_loans\n        , m.status_id\n)\nSELECT\n      updated.member_id\n    , updated.member_ident\n    , updated.dt_created\n    , updated.dt_modified\n    , st.att_pub_ident \"status\"\n    , updated.full_name\n    , updated.max_active_loans\nFROM\n    updated\nJOIN\n    library.struct_type st\nON\n    updated.status_id = st.struct_type_id\n;\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "member_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "member_ident",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "dt_created",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 3,
+        "name": "dt_modified",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 4,
+        "name": "status",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "full_name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "max_active_loans",
+        "type_info": "Int2"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "bd8cd6b7e50b4a1a51c06d2f97729fd8e6be8cb6f48d5ddf0d8ab4e510139661"
+}

@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n    COUNT(*)::BIGINT AS \"count!\"\nFROM\n    library.loan l\nWHERE\n    l.member_id = $1\nAND\n    l.dt_returned = '9999-01-01 00:00:00+00'::TIMESTAMPTZ\n;\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "ca94237e9fd4dcb7abb55fd55db470528d9706edcf0ec51f51d199a5ea953daa"
+}

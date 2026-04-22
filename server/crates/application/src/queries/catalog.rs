@@ -1,7 +1,7 @@
 use anyhow::Context;
 use domain::{
-    book::{Book, port::BookReadRepoPort},
-    book_copy::{BookCopy, BookCopyId, port::BookCopyReadRepoPort},
+    book::{port::BookReadRepoPort, Book},
+    book_copy::{port::BookCopyReadRepoPort, BookCopy, BookCopyId},
 };
 use std::sync::Arc;
 
@@ -17,7 +17,10 @@ impl CatalogQueries {
         book_read_repo: Arc<dyn BookReadRepoPort>,
         book_copy_read_repo: Arc<dyn BookCopyReadRepoPort>,
     ) -> Self {
-        Self { book_read_repo, book_copy_read_repo }
+        Self {
+            book_read_repo,
+            book_copy_read_repo,
+        }
     }
 
     pub async fn get_book_catalog(&self) -> anyhow::Result<Vec<Book>> {

@@ -5,7 +5,11 @@ use super::{BookCopy, BookCopyId, BookCopyPrepared, BookCopyStatus};
 #[async_trait]
 pub trait BookCopyWriteRepoPort: Send + Sync {
     async fn create(&self, insert: &BookCopyPrepared) -> anyhow::Result<BookCopy>;
-    async fn update_status(&self, id: BookCopyId, status: BookCopyStatus) -> anyhow::Result<BookCopy>;
+    async fn update_status(
+        &self,
+        id: BookCopyId,
+        status: BookCopyStatus,
+    ) -> anyhow::Result<BookCopy>;
 }
 
 #[async_trait]
