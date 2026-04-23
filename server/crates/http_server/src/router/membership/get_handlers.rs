@@ -3,10 +3,10 @@ use axum::{
     Json,
 };
 use domain::member::MemberIdent;
+use server_bootstrap::ServerDeps;
 
 use crate::router::{
     auth::AuthUser,
-    dependencies::ServerDeps,
     errors::{not_found, service_error, ApiError},
     lending::schemas::LoanResponseBody,
     membership::schemas::{MemberResponseBody, MEMBERS_TAG},

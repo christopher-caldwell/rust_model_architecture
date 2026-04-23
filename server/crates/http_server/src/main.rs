@@ -5,7 +5,8 @@ use tokio::net::TcpListener;
 use tracing::info;
 use tracing_subscriber::EnvFilter;
 
-use http_server::{config, deps, router::new_router};
+use http_server::router::new_router;
+use server_bootstrap::{config, deps};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -23,11 +24,11 @@ async fn main() -> Result<()> {
         .await
         .with_context(|| format!("failed to bind HTTP listener on {address}"))?;
 
-    info!("CRM server listening on :3000");
+    info!("HTTP server listening on :3000");
 
     axum::serve(listener, app)
         .await
-        .context("crm server exited unexpectedly")?;
+        .context("http server exited unexpectedly")?;
 
     Ok(())
 }

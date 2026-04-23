@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "crates/application",
+    "crates/server_bootstrap",
     "crates/domain",
     "crates/graphql_server",
     "crates/http_server",

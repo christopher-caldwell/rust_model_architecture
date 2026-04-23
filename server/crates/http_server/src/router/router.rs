@@ -8,7 +8,6 @@ use crate::router::catalog::{
     BOOK_COPY_RETURNS_PATH,
 };
 use crate::router::cors::get_cors;
-use crate::router::dependencies::ServerDeps;
 use crate::router::lending::{
     check_out_book_copy, get_overdue_loans, LOANS_PATH, OVERDUE_LOANS_PATH,
 };
@@ -21,6 +20,7 @@ use axum::{
     routing::{get, post, put},
     Router,
 };
+use server_bootstrap::ServerDeps;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 

@@ -8,7 +8,7 @@ use axum::{
 use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
 use serde::{Deserialize, Serialize};
 
-use crate::router::dependencies::ServerDeps;
+use server_bootstrap::ServerDeps;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Claims {

@@ -1,8 +1,8 @@
 use axum::{extract::State, http::StatusCode, Json};
+use server_bootstrap::ServerDeps;
 
 use crate::router::{
     auth::AuthUser,
-    dependencies::ServerDeps,
     errors::{service_error, ApiError},
     membership::schemas::{CreateMemberRequestBody, MemberResponseBody, MEMBERS_TAG},
 };

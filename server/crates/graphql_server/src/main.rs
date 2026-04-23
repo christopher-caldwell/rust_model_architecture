@@ -5,7 +5,8 @@ use tokio::net::TcpListener;
 use tracing::info;
 use tracing_subscriber::EnvFilter;
 
-use graphql_server::{config, deps, router::new_router};
+use graphql_server::router::new_router;
+use server_bootstrap::{config, deps};
 
 #[tokio::main]
 async fn main() -> Result<()> {

@@ -7,6 +7,7 @@ edition = "2021"
 domain = { path = "../domain" }
 application = { path = "../application" }
 persistence = { path = "../persistence" }
+server_bootstrap = { path = "../server_bootstrap" }
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 axum = "0.8"
 sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "postgres", "chrono"] }
@@ -24,4 +25,3 @@ jsonwebtoken = { version = "10.3.0", features = ["rust_crypto"] }
 utoipa-axum = "0.2"
 tower-http = { version = "0.6", features = ["cors"] }
 http = "1"
-nanoid = "0.4"

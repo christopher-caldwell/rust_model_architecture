@@ -1,0 +1,11 @@
+[package]
+name = "server_bootstrap"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+application = { path = "../application" }
+persistence = { path = "../persistence" }
+sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "postgres", "chrono"] }
+anyhow = "1"
+nanoid = "0.4"

@@ -1043,7 +1043,6 @@ name = "graphql_server"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "application",
  "async-graphql",
  "async-graphql-axum",
  "axum",
@@ -1052,10 +1051,8 @@ dependencies = [
  "dotenvy",
  "http",
  "jsonwebtoken",
- "nanoid",
- "persistence",
  "serde",
- "sqlx",
+ "server_bootstrap",
  "tokio",
  "tower-http",
  "tracing",
@@ -1224,11 +1221,11 @@ dependencies = [
  "dotenvy",
  "http",
  "jsonwebtoken",
- "nanoid",
  "persistence",
  "reqwest",
  "serde",
  "serde_json",
+ "server_bootstrap",
  "sqlx",
  "tokio",
  "tower-http",
@@ -2632,6 +2629,17 @@ dependencies = [
  "itoa",
  "ryu",
  "serde",
+]
+
+[[package]]
+name = "server_bootstrap"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "application",
+ "nanoid",
+ "persistence",
+ "sqlx",
 ]
 
 [[package]]

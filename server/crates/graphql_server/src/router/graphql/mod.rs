@@ -7,7 +7,7 @@ use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
 use axum::{extract::State, response::Html};
 use domain::{book_copy::BookCopy, member::Member};
 
-use crate::router::dependencies::ServerDeps;
+use server_bootstrap::ServerDeps;
 
 pub mod catalog;
 pub mod lending;

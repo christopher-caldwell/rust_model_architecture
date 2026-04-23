@@ -1,9 +1,9 @@
 use axum::{extract::State, http::StatusCode, Json};
 use domain::member::MemberIdent;
+use server_bootstrap::ServerDeps;
 
 use crate::router::{
     auth::AuthUser,
-    dependencies::ServerDeps,
     errors::{not_found, service_error, ApiError},
     lending::schemas::{CreateLoanRequestBody, LoanResponseBody, LOANS_TAG},
 };

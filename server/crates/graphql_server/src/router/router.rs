@@ -1,10 +1,10 @@
 use crate::router::auth::auth_middleware;
 use crate::router::cors::get_cors;
-use crate::router::dependencies::ServerDeps;
 use crate::router::graphql::{build_schema, graphql_handler, graphql_playground, GRAPHQL_PATH};
 use axum::middleware::from_fn_with_state;
 use axum::routing::post;
 use axum::{routing::get, Router};
+use server_bootstrap::ServerDeps;
 
 pub fn new_router(deps: ServerDeps) -> Router {
     let cors_layer = get_cors();

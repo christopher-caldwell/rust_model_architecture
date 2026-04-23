@@ -1,7 +1,6 @@
 pub mod auth;
 pub mod catalog;
 pub mod cors;
-pub mod dependencies;
 pub mod errors;
 pub mod health;
 pub mod lending;

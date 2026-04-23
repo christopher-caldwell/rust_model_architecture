@@ -1,9 +1,9 @@
 use axum::{extract::State, http::StatusCode, Json};
+use server_bootstrap::ServerDeps;
 
 use crate::router::{
     auth::AuthUser,
     catalog::books::schemas::{BookResponseBody, CreateBookRequestBody, BOOKS_TAG},
-    dependencies::ServerDeps,
     errors::{service_error, ApiError},
 };
 

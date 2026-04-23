@@ -1,8 +1,8 @@
 use axum::{extract::State, Json};
+use server_bootstrap::ServerDeps;
 
 use crate::router::{
     auth::AuthUser,
-    dependencies::ServerDeps,
     errors::{service_error, ApiError},
     lending::schemas::{LoanResponseBody, LOANS_TAG},
 };

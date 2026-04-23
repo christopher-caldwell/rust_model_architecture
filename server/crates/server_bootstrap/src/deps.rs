@@ -1,12 +1,7 @@
 use std::sync::Arc;
 
-use crate::router::dependencies::{AuthDeps, CatalogDeps, LendingDeps, MembershipDeps, ServerDeps};
 use anyhow::{Context, Result};
-use application::{
-    commands::{CatalogCommands, LendingCommands, MembershipCommands},
-    ports::gen_ident::IdentGeneratorPort,
-    queries::{CatalogQueries, LendingQueries, MembershipQueries},
-};
+use application::ports::gen_ident::IdentGeneratorPort;
 use persistence::{
     book::BookReadRepoSql, book_copy::BookCopyReadRepoSql, loan::LoanReadRepoSql,
     member::MemberReadRepoSql, uow::SqlWriteUnitOfWorkFactory,
@@ -14,6 +9,40 @@ use persistence::{
 use sqlx::{postgres::PgPoolOptions, PgPool};
 
 use crate::config::ServerConfig;
+
+pub use application::commands::{CatalogCommands, LendingCommands, MembershipCommands};
+pub use application::queries::{CatalogQueries, LendingQueries, MembershipQueries};
+
+#[derive(Clone)]
+pub struct ServerDeps {
+    pub auth: AuthDeps,
+    pub catalog: CatalogDeps,
+    pub lending: LendingDeps,
+    pub membership: MembershipDeps,
+}
+
+#[derive(Clone)]
+pub struct AuthDeps {
+    pub jwt_secret: String,
+}
+
+#[derive(Clone)]
+pub struct CatalogDeps {
+    pub commands: Arc<CatalogCommands>,
+    pub queries: Arc<CatalogQueries>,
+}
+
+#[derive(Clone)]
+pub struct LendingDeps {
+    pub commands: Arc<LendingCommands>,
+    pub queries: Arc<LendingQueries>,
+}
+
+#[derive(Clone)]
+pub struct MembershipDeps {
+    pub commands: Arc<MembershipCommands>,
+    pub queries: Arc<MembershipQueries>,
+}
 
 struct MemberIdentGenerator;
 

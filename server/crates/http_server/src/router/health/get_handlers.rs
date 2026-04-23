@@ -1,6 +1,7 @@
 use axum::{extract::State, http::StatusCode, Json};
+use server_bootstrap::ServerDeps;
 
-use crate::router::{dependencies::ServerDeps, health::schemas::HealthCheckResponseBody};
+use crate::router::health::schemas::HealthCheckResponseBody;
 
 #[utoipa::path(
     get,
