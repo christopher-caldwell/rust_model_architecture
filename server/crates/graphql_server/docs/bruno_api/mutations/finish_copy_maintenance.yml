@@ -1,0 +1,30 @@
+info:
+  name: Finish Copy Maintenance
+  type: graphql
+  seq: 9
+
+graphql:
+  method: POST
+  url: "{{BASE_URL}}/graphql"
+  body:
+    query: |-
+      mutation FinishCopyMaintenance($barcode: String!) {
+        finishCopyMaintenance(barcode: $barcode) {
+          barcode
+          createdAt
+          updatedAt
+          authorName
+          status
+        }
+      }
+    variables: |-
+      {
+        "barcode": "BC-9780132350884-001"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

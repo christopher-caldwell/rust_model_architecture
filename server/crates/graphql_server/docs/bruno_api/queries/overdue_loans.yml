@@ -1,0 +1,26 @@
+info:
+  name: Overdue Loans
+  type: graphql
+  seq: 15
+
+graphql:
+  method: POST
+  url: "{{BASE_URL}}/graphql"
+  body:
+    query: |-
+      query OverdueLoans {
+        overdueLoans {
+          loanNumber
+          createdAt
+          updatedAt
+          dueAt
+          returnedAt
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,30 @@
+info:
+  name: Check In Copy
+  type: graphql
+  seq: 17
+
+graphql:
+  method: POST
+  url: "{{BASE_URL}}/graphql"
+  body:
+    query: |-
+      mutation CheckInCopy($barcode: String!) {
+        checkInCopy(barcode: $barcode) {
+          loanNumber
+          createdAt
+          updatedAt
+          dueAt
+          returnedAt
+        }
+      }
+    variables: |-
+      {
+        "barcode": "BC-9780132350884-001"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

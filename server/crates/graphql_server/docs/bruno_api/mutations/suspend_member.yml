@@ -1,0 +1,31 @@
+info:
+  name: Suspend Member
+  type: graphql
+  seq: 12
+
+graphql:
+  method: POST
+  url: "{{BASE_URL}}/graphql"
+  body:
+    query: |-
+      mutation SuspendMember($memberNumber: String!) {
+        suspendMember(memberNumber: $memberNumber) {
+          memberNumber
+          createdAt
+          updatedAt
+          status
+          fullName
+          maxActiveLoans
+        }
+      }
+    variables: |-
+      {
+        "memberNumber": "Q1W2E3R4T5"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

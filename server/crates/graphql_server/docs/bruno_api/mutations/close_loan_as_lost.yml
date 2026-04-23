@@ -1,0 +1,30 @@
+info:
+  name: Close Loan As Lost
+  type: graphql
+  seq: 18
+
+graphql:
+  method: POST
+  url: "{{BASE_URL}}/graphql"
+  body:
+    query: |-
+      mutation CloseLoanAsLost($barcode: String!) {
+        closeLoanAsLost(barcode: $barcode) {
+          barcode
+          createdAt
+          updatedAt
+          authorName
+          status
+        }
+      }
+    variables: |-
+      {
+        "barcode": "BC-9780132350884-001"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

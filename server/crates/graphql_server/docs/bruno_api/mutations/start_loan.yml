@@ -1,0 +1,33 @@
+info:
+  name: Start Loan
+  type: graphql
+  seq: 16
+
+graphql:
+  method: POST
+  url: "{{BASE_URL}}/graphql"
+  body:
+    query: |-
+      mutation StartLoan($input: StartLoanInput!) {
+        startLoan(input: $input) {
+          loanNumber
+          createdAt
+          updatedAt
+          dueAt
+          returnedAt
+        }
+      }
+    variables: |-
+      {
+        "input": {
+          "memberNumber": "Q1W2E3R4T5",
+          "barcode": "BC-9780132350884-001"
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
