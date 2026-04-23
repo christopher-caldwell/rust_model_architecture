@@ -3,7 +3,7 @@ use server_bootstrap::ServerDeps;
 
 use crate::router::{
     auth::AuthUser,
-    errors::{service_error, ApiError},
+    errors::{command_error, ApiError},
     members::schemas::{CreateMemberRequestBody, MemberResponseBody, MEMBERS_TAG},
 };
 
@@ -29,7 +29,7 @@ pub async fn register_member(
 
     let member_response = match register_member_result {
         Ok(member) => MemberResponseBody::from(member),
-        Err(error) => return Err(service_error(error)),
+        Err(error) => return Err(command_error(error)),
     };
 
     Ok((StatusCode::CREATED, Json(member_response)))

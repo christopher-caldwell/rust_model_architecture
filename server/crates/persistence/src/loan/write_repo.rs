@@ -11,6 +11,8 @@ use domain::{
 use sqlx::{Postgres, Transaction};
 use tokio::sync::Mutex;
 
+use crate::loan::read_repo::{CountDbRow, LoanDbRow};
+
 #[derive(sqlx::FromRow)]
 pub struct LoanPreparedResult {
     pub loan_id: i32,
@@ -60,12 +62,14 @@ impl LoanWriteRepoPort for LoanWriteRepoTx {
     async fn create(&self, insert: &LoanPrepared) -> Result<Loan> {
         let mut guard = self.tx.lock().await;
         let tx = guard.as_mut().context("Transaction already consumed")?;
+        let book_copy_id = i32::try_from(insert.book_copy_id.0)
+            .context("book_copy_id exceeds SQL integer range")?;
+        let member_id = i32::from(insert.member_id.0);
         let prepared_result = sqlx::query_file_as!(
             LoanPreparedResult,
             "sql/loan/commands/create.sql",
-            i32::try_from(insert.book_copy_id.0)
-                .context("book_copy_id exceeds SQL integer range")?,
-            i32::from(insert.member_id.0),
+            book_copy_id,
+            member_id,
         )
         .fetch_one(&mut **tx)
         .await
@@ -86,15 +90,43 @@ impl LoanWriteRepoPort for LoanWriteRepoTx {
     async fn end(&self, id: LoanId) -> Result<Loan> {
         let mut guard = self.tx.lock().await;
         let tx = guard.as_mut().context("Transaction already consumed")?;
+        let loan_id = i32::try_from(id.0).context("loan_id exceeds SQL integer range")?;
+        let row = sqlx::query_file_as!(LoanUpdatedDbRow, "sql/loan/commands/end.sql", loan_id,)
+            .fetch_one(&mut **tx)
+            .await
+            .context("Failed to end loan")?;
+
+        row.try_into()
+    }
+
+    async fn find_active_by_book_copy_id_for_update(&self, id: BookCopyId) -> Result<Option<Loan>> {
+        let mut guard = self.tx.lock().await;
+        let tx = guard.as_mut().context("Transaction already consumed")?;
+        let book_copy_id = i32::try_from(id.0).context("book_copy_id exceeds SQL integer range")?;
         let row = sqlx::query_file_as!(
-            LoanUpdatedDbRow,
-            "sql/loan/commands/end.sql",
-            i32::try_from(id.0).context("loan_id exceeds SQL integer range")?,
+            LoanDbRow,
+            "sql/loan/commands/find_active_by_book_copy_id_for_update.sql",
+            book_copy_id
+        )
+        .fetch_optional(&mut **tx)
+        .await
+        .context("Failed to find active loan by book copy id")?;
+
+        row.map(Loan::try_from).transpose()
+    }
+
+    async fn count_active_by_member_id(&self, id: MemberId) -> Result<i64> {
+        let mut guard = self.tx.lock().await;
+        let tx = guard.as_mut().context("Transaction already consumed")?;
+        let row = sqlx::query_file_as!(
+            CountDbRow,
+            "sql/loan/commands/count_active_by_member_id.sql",
+            i32::from(id.0)
         )
         .fetch_one(&mut **tx)
         .await
-        .context("Failed to end loan")?;
+        .context("Failed to count active loans by member id")?;
 
-        row.try_into()
+        Ok(row.count)
     }
 }

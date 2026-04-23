@@ -65,6 +65,8 @@ impl BookCopy {
 
 #[derive(thiserror::Error, Debug)]
 pub enum BookCopyError {
+    #[error("Book copy not found")]
+    NotFound,
     #[error("Book cannot currently be borrowed")]
     CannotBeBorrowed,
     #[error("Book is not active and cannot be sent to maintenance")]

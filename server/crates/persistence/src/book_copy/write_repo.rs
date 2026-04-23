@@ -12,6 +12,7 @@ use domain::{
 use sqlx::{Postgres, Transaction};
 use tokio::sync::Mutex;
 
+use crate::book_copy::read_repo::BookCopyDbRow;
 use crate::book_copy::{book_copy_status_ident, parse_book_copy_status};
 
 #[derive(sqlx::FromRow)]
@@ -82,13 +83,29 @@ impl BookCopyWriteRepoPort for BookCopyWriteRepoTx {
         })
     }
 
-    async fn update_status(&self, id: BookCopyId, status: BookCopyStatus) -> Result<BookCopy> {
+    async fn get_by_barcode_for_update(&self, barcode: &str) -> Result<Option<BookCopy>> {
         let mut guard = self.tx.lock().await;
         let tx = guard.as_mut().context("Transaction already consumed")?;
         let row = sqlx::query_file_as!(
+            BookCopyDbRow,
+            "sql/book_copy/commands/get_by_barcode_for_update.sql",
+            barcode
+        )
+        .fetch_optional(&mut **tx)
+        .await
+        .context("Failed to fetch book copy by barcode")?;
+
+        row.map(BookCopy::try_from).transpose()
+    }
+
+    async fn update_status(&self, id: BookCopyId, status: BookCopyStatus) -> Result<BookCopy> {
+        let mut guard = self.tx.lock().await;
+        let tx = guard.as_mut().context("Transaction already consumed")?;
+        let book_copy_id = i32::try_from(id.0).context("book_copy_id exceeds SQL integer range")?;
+        let row = sqlx::query_file_as!(
             BookCopyUpdatedDbRow,
             "sql/book_copy/commands/update_status.sql",
-            i32::try_from(id.0).context("book_copy_id exceeds SQL integer range")?,
+            book_copy_id,
             book_copy_status_ident(&status),
         )
         .fetch_one(&mut **tx)

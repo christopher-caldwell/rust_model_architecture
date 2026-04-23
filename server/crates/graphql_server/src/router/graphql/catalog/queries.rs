@@ -32,11 +32,7 @@ impl CatalogQuery {
         Ok(book.map(CatalogTitle::from))
     }
 
-    async fn book_copy(
-        &self,
-        ctx: &Context<'_>,
-        barcode: String,
-    ) -> Result<Option<InventoryCopy>> {
+    async fn book_copy(&self, ctx: &Context<'_>, barcode: String) -> Result<Option<InventoryCopy>> {
         let deps = deps(ctx);
         let copy = deps
             .catalog

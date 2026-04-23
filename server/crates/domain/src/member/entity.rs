@@ -66,6 +66,8 @@ impl Member {
 
 #[derive(thiserror::Error, Debug)]
 pub enum MemberError {
+    #[error("Member not found")]
+    NotFound,
     #[error("Member is already suspended")]
     CannotBeSuspended,
     #[error("Member is not currently suspended")]

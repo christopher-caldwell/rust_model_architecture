@@ -2,6 +2,7 @@ use anyhow::Error;
 use axum::{http::StatusCode, Json};
 use domain::{book_copy::BookCopyError, loan::LoanError, member::MemberError};
 use serde::Serialize;
+use server_bootstrap::CommandError;
 use utoipa::ToSchema;
 
 #[derive(Serialize, ToSchema)]
@@ -37,6 +38,31 @@ pub fn service_error(error: Error) -> ApiError {
             error: String::from("Something went wrong"),
         }),
     )
+}
+
+#[must_use]
+pub fn command_error(error: CommandError) -> ApiError {
+    match error {
+        CommandError::NotFound { entity } => (
+            StatusCode::NOT_FOUND,
+            Json(ErrorResponseBody {
+                error: format!("{entity} not found"),
+            }),
+        ),
+        CommandError::Conflict { message } => (
+            StatusCode::CONFLICT,
+            Json(ErrorResponseBody { error: message }),
+        ),
+        CommandError::Unexpected(error) => {
+            tracing::error!("Unhandled request error: {error:?}");
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ErrorResponseBody {
+                    error: String::from("Something went wrong"),
+                }),
+            )
+        }
+    }
 }
 
 fn conflict_message(error: &Error) -> Option<String> {

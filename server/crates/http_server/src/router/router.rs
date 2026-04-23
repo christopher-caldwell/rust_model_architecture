@@ -5,14 +5,10 @@ use crate::router::book_copies::{
     send_book_copy_to_maintenance, BOOK_COPY_BY_ID_PATH, BOOK_COPY_LOST_PATH,
     BOOK_COPY_MAINTENANCE_PATH, BOOK_COPY_REPORT_LOSS_PATH, BOOK_COPY_RETURN_PATH,
 };
-use crate::router::books::{
-    add_book, add_book_copy, get_book_catalog, BOOKS_PATH,
-};
 use crate::router::books::schemas::BOOK_COPIES_BY_BOOK_ID_PATH;
+use crate::router::books::{add_book, add_book_copy, get_book_catalog, BOOKS_PATH};
 use crate::router::cors::get_cors;
-use crate::router::loan::{
-    check_out_book_copy, get_overdue_loans, LOANS_PATH, OVERDUE_LOANS_PATH,
-};
+use crate::router::loan::{check_out_book_copy, get_overdue_loans, LOANS_PATH, OVERDUE_LOANS_PATH};
 use crate::router::members::{
     get_member_details, get_member_loans, reactivate_member, register_member, suspend_member,
     MEMBERS_PATH, MEMBER_BY_ID_PATH, MEMBER_LOANS_PATH, MEMBER_SUSPENSION_PATH,

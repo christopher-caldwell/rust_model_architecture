@@ -10,8 +10,8 @@ pub use post_handlers::{report_lost_loaned_book_copy, return_book_copy};
 pub use put_handlers::{mark_book_copy_lost, send_book_copy_to_maintenance};
 pub use schemas::{
     BookCopyResponseBody, CreateBookCopyRequestBody, BOOK_COPIES_PATH, BOOK_COPIES_TAG,
-    BOOK_COPY_BY_ID_PATH, BOOK_COPY_LOST_PATH, BOOK_COPY_REPORT_LOSS_PATH,
-    BOOK_COPY_MAINTENANCE_PATH, BOOK_COPY_RETURN_PATH,
+    BOOK_COPY_BY_ID_PATH, BOOK_COPY_LOST_PATH, BOOK_COPY_MAINTENANCE_PATH,
+    BOOK_COPY_REPORT_LOSS_PATH, BOOK_COPY_RETURN_PATH,
 };
 
 use utoipa::OpenApi;

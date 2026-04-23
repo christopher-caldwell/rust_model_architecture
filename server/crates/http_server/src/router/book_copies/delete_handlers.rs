@@ -7,7 +7,7 @@ use server_bootstrap::ServerDeps;
 use crate::router::{
     auth::AuthUser,
     book_copies::schemas::{BookCopyResponseBody, BOOK_COPIES_TAG},
-    errors::{not_found, service_error, ApiError},
+    errors::{command_error, ApiError},
 };
 
 #[utoipa::path(
@@ -32,19 +32,11 @@ pub async fn mark_book_copy_found(
     State(deps): State<ServerDeps>,
     Path(barcode): Path<String>,
 ) -> Result<Json<BookCopyResponseBody>, ApiError> {
-    let book_copy_result = deps.catalog.queries.get_book_copy_details(&barcode).await;
-
-    let book_copy = match book_copy_result {
-        Ok(Some(book_copy)) => book_copy,
-        Ok(None) => return Err(not_found("Book copy not found")),
-        Err(error) => return Err(service_error(error)),
-    };
-
-    let mark_book_copy_found_result = deps.catalog.commands.mark_book_copy_found(book_copy).await;
+    let mark_book_copy_found_result = deps.catalog.commands.mark_book_copy_found(barcode).await;
 
     let book_copy_response = match mark_book_copy_found_result {
         Ok(updated) => Json(BookCopyResponseBody::from(updated)),
-        Err(error) => return Err(service_error(error)),
+        Err(error) => return Err(command_error(error)),
     };
 
     Ok(book_copy_response)
@@ -72,23 +64,15 @@ pub async fn complete_book_copy_maintenance(
     State(deps): State<ServerDeps>,
     Path(barcode): Path<String>,
 ) -> Result<Json<BookCopyResponseBody>, ApiError> {
-    let book_copy_result = deps.catalog.queries.get_book_copy_details(&barcode).await;
-
-    let book_copy = match book_copy_result {
-        Ok(Some(book_copy)) => book_copy,
-        Ok(None) => return Err(not_found("Book copy not found")),
-        Err(error) => return Err(service_error(error)),
-    };
-
     let complete_book_copy_maintenance_result = deps
         .catalog
         .commands
-        .complete_book_copy_maintenance(book_copy)
+        .complete_book_copy_maintenance(barcode)
         .await;
 
     let book_copy_response = match complete_book_copy_maintenance_result {
         Ok(updated) => Json(BookCopyResponseBody::from(updated)),
-        Err(error) => return Err(service_error(error)),
+        Err(error) => return Err(command_error(error)),
     };
 
     Ok(book_copy_response)

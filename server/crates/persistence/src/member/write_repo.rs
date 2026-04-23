@@ -9,6 +9,7 @@ use domain::member::{
 use sqlx::{Postgres, Transaction};
 use tokio::sync::Mutex;
 
+use crate::member::read_repo::MemberDbRow;
 use crate::member::{member_status_ident, parse_member_status};
 
 #[derive(sqlx::FromRow)]
@@ -78,6 +79,22 @@ impl MemberWriteRepoPort for MemberWriteRepoTx {
             full_name: insert.full_name.clone(),
             max_active_loans: insert.max_active_loans,
         })
+    }
+
+    async fn get_by_ident_for_update(&self, ident: &MemberIdent) -> Result<Option<Member>> {
+        let mut guard = self.tx.lock().await;
+        let tx = guard.as_mut().context("Transaction already consumed")?;
+        let ident_str: String = ident.clone().into();
+        let row = sqlx::query_file_as!(
+            MemberDbRow,
+            "sql/member/commands/get_by_ident_for_update.sql",
+            ident_str
+        )
+        .fetch_optional(&mut **tx)
+        .await
+        .context("Failed to fetch member by ident")?;
+
+        row.map(Member::try_from).transpose()
     }
 
     async fn update_status(&self, id: MemberId, status: MemberStatus) -> Result<Member> {

@@ -11,6 +11,11 @@ use super::{Loan, LoanId, LoanPrepared};
 pub trait LoanWriteRepoPort: Send + Sync {
     async fn create(&self, insert: &LoanPrepared) -> anyhow::Result<Loan>;
     async fn end(&self, id: LoanId) -> anyhow::Result<Loan>;
+    async fn find_active_by_book_copy_id_for_update(
+        &self,
+        id: BookCopyId,
+    ) -> anyhow::Result<Option<Loan>>;
+    async fn count_active_by_member_id(&self, id: MemberId) -> anyhow::Result<i64>;
 }
 
 #[async_trait]

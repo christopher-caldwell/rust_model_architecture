@@ -19,6 +19,12 @@ pub struct BookCreationPayload {
     pub author_name: String,
 }
 
+#[derive(thiserror::Error, Debug)]
+pub enum BookError {
+    #[error("Book not found")]
+    NotFound,
+}
+
 pub struct BookPrepared {
     pub isbn: String,
     pub title: String,

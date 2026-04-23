@@ -1,7 +1,7 @@
 use anyhow::Context;
 use domain::{
     member::{Member, MemberCreationPayload, MemberError, MemberIdent, MemberStatus},
-    uow::WriteUnitOfWorkFactory,
+    uow::{UnitOfWorkPort, WriteUnitOfWorkFactory},
 };
 use std::sync::Arc;
 
@@ -25,30 +25,23 @@ impl MembershipCommands {
         }
     }
 
-    async fn change_member_status(
+    async fn get_member_by_ident(
         &self,
-        member: Member,
-        new_status: MemberStatus,
-        added_context: &'static str,
-    ) -> anyhow::Result<Member> {
-        let uow = self
-            .uow_factory
-            .build()
+        uow: &dyn UnitOfWorkPort,
+        member_ident: &str,
+    ) -> Result<Member, super::CommandError> {
+        let ident = MemberIdent(member_ident.to_owned());
+        uow.membership_write_repo()
+            .get_by_ident_for_update(&ident)
             .await
-            .context("Failed to build unit of work")?;
-        let result = uow
-            .membership_write_repo()
-            .update_status(member.id, new_status)
-            .await
-            .context(added_context)?;
-        uow.commit().await.context("Failed to commit transaction")?;
-        Ok(result)
+            .context("Failed to load member for write")?
+            .ok_or(MemberError::NotFound.into())
     }
 
     pub async fn register_member(
         &self,
         payload: MemberCreationPayload,
-    ) -> Result<Member, anyhow::Error> {
+    ) -> Result<Member, super::CommandError> {
         let ident = MemberIdent(self.ident_generator.gen());
         let prepared = payload.prepare(ident);
         let uow = self
@@ -65,18 +58,47 @@ impl MembershipCommands {
         Ok(result)
     }
 
-    pub async fn suspend_member(&self, member: Member) -> anyhow::Result<Member> {
-        anyhow::ensure!(member.can_be_suspended(), MemberError::CannotBeSuspended);
-        self.change_member_status(member, MemberStatus::Suspended, "Failed to suspend member")
+    pub async fn suspend_member(
+        &self,
+        input: super::MemberIdentInput,
+    ) -> Result<Member, super::CommandError> {
+        let uow = self
+            .uow_factory
+            .build()
             .await
+            .context("Failed to build unit of work")?;
+        let member = self.get_member_by_ident(&*uow, &input.member_ident).await?;
+        if !member.can_be_suspended() {
+            return Err(MemberError::CannotBeSuspended.into());
+        }
+        let result = uow
+            .membership_write_repo()
+            .update_status(member.id, MemberStatus::Suspended)
+            .await
+            .context("Failed to suspend member")?;
+        uow.commit().await.context("Failed to commit transaction")?;
+        Ok(result)
     }
 
-    pub async fn reactivate_member(&self, member: Member) -> anyhow::Result<Member> {
-        anyhow::ensure!(
-            member.can_be_reactivated(),
-            MemberError::CannotBeReactivated
-        );
-        self.change_member_status(member, MemberStatus::Active, "Failed to reactivate member")
+    pub async fn reactivate_member(
+        &self,
+        input: super::MemberIdentInput,
+    ) -> Result<Member, super::CommandError> {
+        let uow = self
+            .uow_factory
+            .build()
             .await
+            .context("Failed to build unit of work")?;
+        let member = self.get_member_by_ident(&*uow, &input.member_ident).await?;
+        if !member.can_be_reactivated() {
+            return Err(MemberError::CannotBeReactivated.into());
+        }
+        let result = uow
+            .membership_write_repo()
+            .update_status(member.id, MemberStatus::Active)
+            .await
+            .context("Failed to reactivate member")?;
+        uow.commit().await.context("Failed to commit transaction")?;
+        Ok(result)
     }
 }

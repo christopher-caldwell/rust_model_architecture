@@ -1,13 +1,12 @@
 use anyhow::Error as AnyhowError;
 use async_graphql::{
     http::{playground_source, GraphQLPlaygroundConfig},
-    Context, EmptySubscription, Error, ErrorExtensions, MergedObject, Result, Schema,
+    Context, EmptySubscription, Error, ErrorExtensions, MergedObject, Schema,
 };
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
 use axum::{extract::State, response::Html};
-use domain::{book_copy::BookCopy, member::Member};
 
-use server_bootstrap::ServerDeps;
+use server_bootstrap::{CommandError, ServerDeps};
 
 pub mod catalog;
 pub mod lending;
@@ -58,30 +57,6 @@ pub(crate) fn deps<'a>(ctx: &'a Context<'a>) -> &'a ServerDeps {
     ctx.data_unchecked::<ServerDeps>()
 }
 
-pub(crate) async fn find_member(deps: &ServerDeps, member_number: String) -> Result<Member> {
-    deps.membership
-        .queries
-        .get_member_details(&domain::member::MemberIdent(member_number))
-        .await
-        .map_err(gql_service_error)?
-        .ok_or_else(|| gql_not_found("Member"))
-}
-
-pub(crate) async fn find_copy(deps: &ServerDeps, barcode: String) -> Result<BookCopy> {
-    deps.catalog
-        .queries
-        .get_book_copy_details(&barcode)
-        .await
-        .map_err(gql_service_error)?
-        .ok_or_else(|| gql_not_found("Book copy"))
-}
-
-pub(crate) fn gql_not_found(entity: &str) -> Error {
-    Error::new(format!("{entity} not found")).extend_with(|_, e| {
-        e.set("code", "NOT_FOUND");
-    })
-}
-
 pub(crate) fn gql_service_error(error: AnyhowError) -> Error {
     if let Some(message) = conflict_message(&error) {
         return Error::new(message).extend_with(|_, e| {
@@ -93,6 +68,25 @@ pub(crate) fn gql_service_error(error: AnyhowError) -> Error {
     Error::new("Something went wrong").extend_with(|_, e| {
         e.set("code", "INTERNAL_SERVER_ERROR");
     })
+}
+
+pub(crate) fn gql_command_error(error: CommandError) -> Error {
+    match error {
+        CommandError::NotFound { entity } => {
+            Error::new(format!("{entity} not found")).extend_with(|_, e| {
+                e.set("code", "NOT_FOUND");
+            })
+        }
+        CommandError::Conflict { message } => Error::new(message).extend_with(|_, e| {
+            e.set("code", "CONFLICT");
+        }),
+        CommandError::Unexpected(error) => {
+            tracing::error!("Unhandled GraphQL error: {error:?}");
+            Error::new("Something went wrong").extend_with(|_, e| {
+                e.set("code", "INTERNAL_SERVER_ERROR");
+            })
+        }
+    }
 }
 
 fn conflict_message(error: &AnyhowError) -> Option<String> {

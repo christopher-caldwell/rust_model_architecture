@@ -86,10 +86,11 @@ async fn find_active_by_book_copy_id_with<'e, E>(
 where
     E: Executor<'e, Database = Postgres>,
 {
+    let book_copy_id = i32::try_from(id.0).context("book_copy_id exceeds SQL integer range")?;
     let row = sqlx::query_file_as!(
         LoanDbRow,
         "sql/loan/queries/find_active_by_book_copy_id.sql",
-        i32::try_from(id.0).context("book_copy_id exceeds SQL integer range")?
+        book_copy_id
     )
     .fetch_optional(executor)
     .await
@@ -118,6 +119,7 @@ pub struct LoanReadRepoSql {
     pub pool: PgPool,
 }
 
+#[allow(dead_code)]
 pub struct LoanReadRepoTx {
     pub tx: Arc<Mutex<Option<Transaction<'static, Postgres>>>>,
 }

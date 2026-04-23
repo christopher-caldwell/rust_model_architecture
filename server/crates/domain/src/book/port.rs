@@ -5,6 +5,7 @@ use super::{Book, BookPrepared};
 #[async_trait]
 pub trait BookWriteRepoPort: Send + Sync {
     async fn create(&self, insert: &BookPrepared) -> anyhow::Result<Book>;
+    async fn get_by_isbn(&self, isbn: &str) -> anyhow::Result<Option<Book>>;
 }
 
 #[async_trait]

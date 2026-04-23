@@ -7,7 +7,7 @@ use server_bootstrap::ServerDeps;
 use crate::router::{
     auth::AuthUser,
     book_copies::schemas::{BookCopyResponseBody, BOOK_COPIES_TAG},
-    errors::{not_found, service_error, ApiError},
+    errors::{command_error, ApiError},
     loan::schemas::LoanResponseBody,
 };
 
@@ -33,19 +33,11 @@ pub async fn return_book_copy(
     State(deps): State<ServerDeps>,
     Path(barcode): Path<String>,
 ) -> Result<Json<LoanResponseBody>, ApiError> {
-    let book_copy_result = deps.catalog.queries.get_book_copy_details(&barcode).await;
-
-    let book_copy = match book_copy_result {
-        Ok(Some(book_copy)) => book_copy,
-        Ok(None) => return Err(not_found("Book copy not found")),
-        Err(error) => return Err(service_error(error)),
-    };
-
-    let return_book_copy_result = deps.lending.commands.return_book_copy(book_copy).await;
+    let return_book_copy_result = deps.lending.commands.return_book_copy(barcode).await;
 
     let loan_response = match return_book_copy_result {
         Ok(loan) => Json(LoanResponseBody::from(loan)),
-        Err(error) => return Err(service_error(error)),
+        Err(error) => return Err(command_error(error)),
     };
 
     Ok(loan_response)
@@ -73,23 +65,15 @@ pub async fn report_lost_loaned_book_copy(
     State(deps): State<ServerDeps>,
     Path(barcode): Path<String>,
 ) -> Result<Json<BookCopyResponseBody>, ApiError> {
-    let book_copy_result = deps.catalog.queries.get_book_copy_details(&barcode).await;
-
-    let book_copy = match book_copy_result {
-        Ok(Some(book_copy)) => book_copy,
-        Ok(None) => return Err(not_found("Book copy not found")),
-        Err(error) => return Err(service_error(error)),
-    };
-
     let report_lost_loaned_book_copy_result = deps
         .lending
         .commands
-        .report_lost_loaned_book_copy(book_copy)
+        .report_lost_loaned_book_copy(barcode)
         .await;
 
     let book_copy_response = match report_lost_loaned_book_copy_result {
         Ok(updated) => Json(BookCopyResponseBody::from(updated)),
-        Err(error) => return Err(service_error(error)),
+        Err(error) => return Err(command_error(error)),
     };
 
     Ok(book_copy_response)

@@ -7,10 +7,8 @@ use sqlx::{PgPool, Postgres, Transaction};
 use tokio::sync::Mutex;
 
 use crate::{
-    book::write_repo::BookWriteRepoTx,
-    book_copy::write_repo::BookCopyWriteRepoTx,
-    loan::{read_repo::LoanReadRepoTx, write_repo::LoanWriteRepoTx},
-    member::write_repo::MemberWriteRepoTx,
+    book::write_repo::BookWriteRepoTx, book_copy::write_repo::BookCopyWriteRepoTx,
+    loan::write_repo::LoanWriteRepoTx, member::write_repo::MemberWriteRepoTx,
 };
 
 pub struct SqlUnitOfWork {
@@ -19,7 +17,6 @@ pub struct SqlUnitOfWork {
     book_copy_write_repo: BookCopyWriteRepoTx,
     membership_write_repo: MemberWriteRepoTx,
     loan_write_repo: LoanWriteRepoTx,
-    loan_read_repo: LoanReadRepoTx,
 }
 
 #[async_trait]
@@ -38,10 +35,6 @@ impl UnitOfWorkPort for SqlUnitOfWork {
 
     fn loan_write_repo(&self) -> &dyn domain::loan::port::LoanWriteRepoPort {
         &self.loan_write_repo
-    }
-
-    fn loan_read_repo(&self) -> &dyn domain::loan::port::LoanReadRepoPort {
-        &self.loan_read_repo
     }
 
     async fn commit(self: Box<Self>) -> anyhow::Result<()> {
@@ -70,7 +63,6 @@ impl WriteUnitOfWorkFactory for SqlWriteUnitOfWorkFactory {
             book_copy_write_repo: BookCopyWriteRepoTx { tx: tx.clone() },
             membership_write_repo: MemberWriteRepoTx { tx: tx.clone() },
             loan_write_repo: LoanWriteRepoTx { tx: tx.clone() },
-            loan_read_repo: LoanReadRepoTx { tx },
         }))
     }
 }

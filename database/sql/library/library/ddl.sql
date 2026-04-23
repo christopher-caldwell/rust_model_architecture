@@ -128,6 +128,7 @@ CREATE TABLE loan (
 )
 ;
 CREATE UNIQUE INDEX idx_loan_loan_ident                         ON loan                                         USING btree (loan_ident);
+CREATE UNIQUE INDEX idx_loan_only_one_loan_per_copy             ON loan                                         USING btree (book_copy_id, dt_returned);
 SELECT update_dt_modified_column('loan');
 
 

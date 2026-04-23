@@ -1,7 +1,8 @@
 use async_graphql::{Context, Object, Result};
 
 use crate::router::graphql::membership::{LibraryMember, RegisterMemberInput};
-use crate::router::graphql::{deps, find_member, gql_service_error};
+use crate::router::graphql::{deps, gql_command_error};
+use server_bootstrap::MemberIdentInput;
 
 #[derive(Default)]
 pub struct MembershipMutation;
@@ -19,7 +20,7 @@ impl MembershipMutation {
             .commands
             .register_member(input.into())
             .await
-            .map_err(gql_service_error)?;
+            .map_err(gql_command_error)?;
 
         Ok(LibraryMember::from(member))
     }
@@ -30,13 +31,15 @@ impl MembershipMutation {
         member_number: String,
     ) -> Result<LibraryMember> {
         let deps = deps(ctx);
-        let member = find_member(deps, member_number).await?;
+        let input = MemberIdentInput {
+            member_ident: member_number,
+        };
         let updated = deps
             .membership
             .commands
-            .suspend_member(member)
+            .suspend_member(input)
             .await
-            .map_err(gql_service_error)?;
+            .map_err(gql_command_error)?;
 
         Ok(LibraryMember::from(updated))
     }
@@ -47,13 +50,15 @@ impl MembershipMutation {
         member_number: String,
     ) -> Result<LibraryMember> {
         let deps = deps(ctx);
-        let member = find_member(deps, member_number).await?;
+        let input = MemberIdentInput {
+            member_ident: member_number,
+        };
         let updated = deps
             .membership
             .commands
-            .reactivate_member(member)
+            .reactivate_member(input)
             .await
-            .map_err(gql_service_error)?;
+            .map_err(gql_command_error)?;
 
         Ok(LibraryMember::from(updated))
     }

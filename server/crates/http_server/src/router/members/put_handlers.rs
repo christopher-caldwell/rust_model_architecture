@@ -2,12 +2,11 @@ use axum::{
     extract::{Path, State},
     Json,
 };
-use domain::member::MemberIdent;
-use server_bootstrap::ServerDeps;
+use server_bootstrap::{MemberIdentInput, ServerDeps};
 
 use crate::router::{
     auth::AuthUser,
-    errors::{not_found, service_error, ApiError},
+    errors::{command_error, ApiError},
     members::schemas::{MemberResponseBody, MEMBERS_TAG},
 };
 
@@ -33,23 +32,14 @@ pub async fn suspend_member(
     State(deps): State<ServerDeps>,
     Path(ident): Path<String>,
 ) -> Result<Json<MemberResponseBody>, ApiError> {
-    let member_result = deps
-        .membership
-        .queries
-        .get_member_details(&MemberIdent(ident))
-        .await;
-
-    let member = match member_result {
-        Ok(Some(member)) => member,
-        Ok(None) => return Err(not_found("Member not found")),
-        Err(error) => return Err(service_error(error)),
+    let input = MemberIdentInput {
+        member_ident: ident,
     };
-
-    let suspend_member_result = deps.membership.commands.suspend_member(member).await;
+    let suspend_member_result = deps.membership.commands.suspend_member(input).await;
 
     let member_response = match suspend_member_result {
         Ok(updated) => Json(MemberResponseBody::from(updated)),
-        Err(error) => return Err(service_error(error)),
+        Err(error) => return Err(command_error(error)),
     };
 
     Ok(member_response)

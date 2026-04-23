@@ -48,10 +48,11 @@ pub struct BookCopyReadRepoSql {
 #[async_trait]
 impl BookCopyReadRepoPort for BookCopyReadRepoSql {
     async fn get_by_id(&self, id: BookCopyId) -> Result<Option<BookCopy>> {
+        let book_copy_id = i32::try_from(id.0).context("book_copy_id exceeds SQL integer range")?;
         let row = sqlx::query_file_as!(
             BookCopyDbRow,
             "sql/book_copy/queries/get_by_id.sql",
-            i32::try_from(id.0).context("book_copy_id exceeds SQL integer range")?
+            book_copy_id
         )
         .fetch_optional(&self.pool)
         .await
