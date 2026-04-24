@@ -6,7 +6,7 @@ use super::{Member, MemberId, MemberIdent, MemberPrepared, MemberStatus};
 pub trait MemberWriteRepoPort: Send + Sync {
     async fn create(&self, insert: &MemberPrepared) -> anyhow::Result<Member>;
     async fn get_by_ident_for_update(&self, ident: &MemberIdent) -> anyhow::Result<Option<Member>>;
-    async fn update_status(&self, id: MemberId, status: MemberStatus) -> anyhow::Result<Member>;
+    async fn update_status(&self, id: MemberId, status: MemberStatus) -> anyhow::Result<()>;
 }
 
 #[async_trait]

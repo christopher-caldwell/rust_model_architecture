@@ -16,16 +16,6 @@ impl From<LoanIdent> for String {
     }
 }
 
-// impl TryFrom<String> for MemberIdent {
-//     type Error = anyhow::Error;
-
-//     fn try_from(value: String) -> Result<Self, Self::Error> {
-//         anyhow::ensure!(value.len() == 10, "ident must be 10 characters");
-//         Ok(Self(value))
-//     }
-// }
-// let ident = MemberIdent::try_from(path_param)?;
-
 pub struct Loan {
     pub id: LoanId,
     pub ident: LoanIdent,
@@ -49,8 +39,16 @@ pub struct LoanPrepared {
 
 impl Loan {
     #[must_use]
-    pub fn can_be_returned(&self) -> bool {
+    fn can_be_returned(&self) -> bool {
         self.dt_returned.is_none()
+    }
+
+    /// Guard: ensures loan has not already been returned.
+    pub fn ensure_can_be_returned(&self) -> Result<(), LoanError> {
+        if !self.can_be_returned() {
+            return Err(LoanError::CannotBeReturned);
+        }
+        Ok(())
     }
 }
 

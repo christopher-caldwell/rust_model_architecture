@@ -10,7 +10,7 @@ pub trait BookCopyWriteRepoPort: Send + Sync {
         &self,
         id: BookCopyId,
         status: BookCopyStatus,
-    ) -> anyhow::Result<BookCopy>;
+    ) -> anyhow::Result<()>;
 }
 
 #[async_trait]

@@ -10,7 +10,7 @@ use super::{Loan, LoanId, LoanPrepared};
 #[async_trait]
 pub trait LoanWriteRepoPort: Send + Sync {
     async fn create(&self, insert: &LoanPrepared) -> anyhow::Result<Loan>;
-    async fn end(&self, id: LoanId) -> anyhow::Result<Loan>;
+    async fn end(&self, id: LoanId) -> anyhow::Result<()>;
     async fn find_active_by_book_copy_id_for_update(
         &self,
         id: BookCopyId,
