@@ -43,7 +43,6 @@ impl BookCopyWriteRepoPort for BookCopyWriteRepoTx {
             dt_created: now,
             dt_modified: now,
             book_id: insert.book_id,
-            author_name: String::new(),
             status: insert.status.clone(),
         };
         Ok(result)

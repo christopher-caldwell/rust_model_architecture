@@ -11,8 +11,8 @@ pub use queries::MembershipQuery;
 #[derive(SimpleObject)]
 pub struct LibraryMember {
     member_number: String,
-    created_at: DateTime<Utc>,
-    updated_at: DateTime<Utc>,
+    dt_created: DateTime<Utc>,
+    dt_modified: DateTime<Utc>,
     status: LibraryMemberStatus,
     full_name: String,
     max_active_loans: i16,
@@ -22,8 +22,8 @@ impl From<Member> for LibraryMember {
     fn from(value: Member) -> Self {
         Self {
             member_number: value.ident.0,
-            created_at: value.dt_created,
-            updated_at: value.dt_modified,
+            dt_created: value.dt_created,
+            dt_modified: value.dt_modified,
             status: LibraryMemberStatus::from(value.status),
             full_name: value.full_name,
             max_active_loans: value.max_active_loans,

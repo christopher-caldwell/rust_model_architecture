@@ -16,7 +16,6 @@ pub struct BookCopyDbRow {
     pub dt_created: DateTime<Utc>,
     pub dt_modified: DateTime<Utc>,
     pub book_id: i32,
-    pub author_name: String,
     pub status: String,
 }
 
@@ -30,7 +29,6 @@ impl TryFrom<BookCopyDbRow> for BookCopy {
             dt_created: value.dt_created,
             dt_modified: value.dt_modified,
             book_id: BookId(value.book_id),
-            author_name: value.author_name,
             status: BookCopyStatus::from_str(&value.status)
                 .context("Invalid book copy status in DB")?,
         })

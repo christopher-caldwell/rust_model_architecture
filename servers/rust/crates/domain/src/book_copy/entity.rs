@@ -14,7 +14,6 @@ pub struct BookCopy {
     pub dt_created: DateTime<Utc>,
     pub dt_modified: DateTime<Utc>,
     pub book_id: BookId,
-    pub author_name: String,
     pub status: BookCopyStatus,
 }
 

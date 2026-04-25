@@ -1766,7 +1766,6 @@ name = "persistence"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "application",
  "async-trait",
  "chrono",
  "domain",

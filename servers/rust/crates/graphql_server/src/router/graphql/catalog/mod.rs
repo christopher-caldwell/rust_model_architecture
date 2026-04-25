@@ -14,8 +14,8 @@ pub use queries::CatalogQuery;
 #[derive(SimpleObject)]
 pub struct CatalogTitle {
     isbn: String,
-    created_at: DateTime<Utc>,
-    updated_at: DateTime<Utc>,
+    dt_created: DateTime<Utc>,
+    dt_modified: DateTime<Utc>,
     title: String,
     author_name: String,
 }
@@ -24,8 +24,8 @@ impl From<Book> for CatalogTitle {
     fn from(value: Book) -> Self {
         Self {
             isbn: value.isbn,
-            created_at: value.dt_created,
-            updated_at: value.dt_modified,
+            dt_created: value.dt_created,
+            dt_modified: value.dt_modified,
             title: value.title,
             author_name: value.author_name,
         }
@@ -35,9 +35,8 @@ impl From<Book> for CatalogTitle {
 #[derive(SimpleObject)]
 pub struct InventoryCopy {
     barcode: String,
-    created_at: DateTime<Utc>,
-    updated_at: DateTime<Utc>,
-    author_name: String,
+    dt_created: DateTime<Utc>,
+    dt_modified: DateTime<Utc>,
     status: InventoryCopyStatus,
 }
 
@@ -45,9 +44,8 @@ impl From<BookCopy> for InventoryCopy {
     fn from(value: BookCopy) -> Self {
         Self {
             barcode: value.barcode,
-            created_at: value.dt_created,
-            updated_at: value.dt_modified,
-            author_name: value.author_name,
+            dt_created: value.dt_created,
+            dt_modified: value.dt_modified,
             status: InventoryCopyStatus::from(value.status),
         }
     }

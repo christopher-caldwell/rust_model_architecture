@@ -16,7 +16,6 @@ pub struct BookCopyResponseBody {
     pub barcode: String,
     pub dt_created: DateTime<Utc>,
     pub dt_modified: DateTime<Utc>,
-    pub author_name: String,
     pub status: String,
 }
 
@@ -26,7 +25,6 @@ impl From<BookCopy> for BookCopyResponseBody {
             barcode: value.barcode,
             dt_created: value.dt_created,
             dt_modified: value.dt_modified,
-            author_name: value.author_name,
             status: value.status.to_string(),
         }
     }
