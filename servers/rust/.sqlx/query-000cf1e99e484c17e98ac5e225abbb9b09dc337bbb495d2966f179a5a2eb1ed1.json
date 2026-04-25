@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n      bc.book_copy_id\n    , bc.barcode\n    , bc.dt_created\n    , bc.dt_modified\n    , bc.book_id\n    , st.att_pub_ident \"status\"\nFROM\n    library.book_copy bc\nJOIN\n    library.struct_type st\nON\n    bc.status_id = st.struct_type_id\nWHERE\n    bc.barcode = $1\nFOR UPDATE OF bc\n;\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "book_copy_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "barcode",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "dt_created",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 3,
+        "name": "dt_modified",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 4,
+        "name": "book_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "status",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "000cf1e99e484c17e98ac5e225abbb9b09dc337bbb495d2966f179a5a2eb1ed1"
+}

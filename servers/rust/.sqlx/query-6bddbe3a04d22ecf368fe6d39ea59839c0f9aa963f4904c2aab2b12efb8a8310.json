@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE library.member m\nSET\n    status_id = (\n        SELECT st.struct_type_id\n        FROM library.struct_type st\n        WHERE st.group_name = 'member_status'\n          AND st.att_pub_ident = $2\n    )\nWHERE\n    m.member_id = $1\n;\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6bddbe3a04d22ecf368fe6d39ea59839c0f9aa963f4904c2aab2b12efb8a8310"
+}

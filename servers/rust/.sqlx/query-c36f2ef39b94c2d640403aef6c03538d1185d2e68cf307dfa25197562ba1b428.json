@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO library.book_copy (book_id, status_id, barcode)\nVALUES\n(\n      $1\n    , (\n          SELECT st.struct_type_id\n          FROM library.struct_type st\n          WHERE st.group_name = 'book_copy_status'\n            AND st.att_pub_ident = $2\n      )\n    , $3\n)\nRETURNING\n    book_copy_id\n;\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "book_copy_id",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "c36f2ef39b94c2d640403aef6c03538d1185d2e68cf307dfa25197562ba1b428"
+}

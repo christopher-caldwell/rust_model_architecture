@@ -46,7 +46,7 @@ test:
 #
 # Re-run this whenever you change a query_file_as! query or the DB schema.
 sqlx-prepare:
-    @set -a; . .env; set +a; cargo sqlx prepare --workspace
+    @set -a; . .env; set +a; cargo sqlx prepare --workspace && cp -r .sqlx crates/persistence/
 
 # Full sanity check: typecheck + clippy + fmt-check
 check-sanity: typecheck lint fmt-check

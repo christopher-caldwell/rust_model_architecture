@@ -1,16 +1,16 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT\n      bc.book_copy_id\n    , bc.barcode\n    , bc.dt_created\n    , bc.dt_modified\n    , bc.book_id\n    , b.author_name\n    , st.att_pub_ident \"status\"\nFROM\n    library.book_copy bc\nJOIN\n    library.book b\nON\n    bc.book_id = b.book_id\nJOIN\n    library.struct_type st\nON\n    bc.status_id = st.struct_type_id\nWHERE\n    bc.barcode = $1\nFOR UPDATE OF bc\n;\n",
+  "query": "SELECT\n      b.book_id\n    , b.isbn\n    , b.dt_created\n    , b.dt_modified\n    , b.title\n    , b.author_name\nFROM\n    library.book b\nWHERE\n    b.isbn = $1\n;\n",
   "describe": {
     "columns": [
       {
         "ordinal": 0,
-        "name": "book_copy_id",
+        "name": "book_id",
         "type_info": "Int4"
       },
       {
         "ordinal": 1,
-        "name": "barcode",
+        "name": "isbn",
         "type_info": "Text"
       },
       {
@@ -25,17 +25,12 @@
       },
       {
         "ordinal": 4,
-        "name": "book_id",
-        "type_info": "Int4"
+        "name": "title",
+        "type_info": "Text"
       },
       {
         "ordinal": 5,
         "name": "author_name",
-        "type_info": "Text"
-      },
-      {
-        "ordinal": 6,
-        "name": "status",
         "type_info": "Text"
       }
     ],
@@ -50,9 +45,8 @@
       false,
       false,
       false,
-      false,
       false
     ]
   },
-  "hash": "3be189fe7456b4466025e9a09d6c120e89e75f971f32998aa898f089a17c337e"
+  "hash": "7e4c556c0aa7588b9cf4a7487a68bdc9a0fa1c9d6b8d175a8a92d46366f6db0b"
 }

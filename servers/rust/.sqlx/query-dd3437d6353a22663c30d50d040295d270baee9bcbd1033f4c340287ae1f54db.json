@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE library.book_copy bc\nSET\n    status_id = (\n        SELECT st.struct_type_id\n        FROM library.struct_type st\n        WHERE st.group_name = 'book_copy_status'\n          AND st.att_pub_ident = $2\n    )\nWHERE\n    bc.book_copy_id = $1\n;\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "dd3437d6353a22663c30d50d040295d270baee9bcbd1033f4c340287ae1f54db"
+}

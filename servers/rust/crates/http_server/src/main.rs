@@ -19,12 +19,12 @@ async fn main() -> Result<()> {
     let config = config::load_server_config()?;
     let deps = deps::create_server_deps(&config).await?;
     let app = new_router(deps);
-    let address = SocketAddr::from(([0, 0, 0, 0], 3000));
+    let address = SocketAddr::from(([0, 0, 0, 0], config.server_port));
     let listener = TcpListener::bind(address)
         .await
         .with_context(|| format!("failed to bind HTTP listener on {address}"))?;
 
-    info!("HTTP server listening on :3000");
+    info!("HTTP server listening on :{}", config.server_port);
 
     axum::serve(listener, app)
         .await

@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO library.book (isbn, title, author_name)\nVALUES\n(\n      $1\n    , $2\n    , $3\n)\nRETURNING\n    book_id\n;\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "book_id",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "f46e82ef2b026c0381ecd12da230539d442950165be2c8ea3045c0d7ff52beff"
+}

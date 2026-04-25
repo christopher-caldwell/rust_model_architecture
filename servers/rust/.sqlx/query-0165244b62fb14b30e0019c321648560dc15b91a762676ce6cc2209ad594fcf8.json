@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT\n      l.loan_id\n    , l.loan_ident\n    , l.dt_created\n    , l.dt_modified\n    , l.book_copy_id\n    , l.member_id\n    , NULLIF(l.dt_due, '9999-01-01 00:00:00+00'::TIMESTAMPTZ) AS dt_due\n    , NULLIF(l.dt_returned, '9999-01-01 00:00:00+00'::TIMESTAMPTZ) AS dt_returned\nFROM\n    library.loan l\nWHERE\n    l.dt_returned = '9999-01-01 00:00:00+00'::TIMESTAMPTZ\nAND\n    l.dt_due < CURRENT_TIMESTAMP\nORDER BY\n      l.dt_due\n    , l.loan_id\n;\n",
+  "query": "SELECT\n      l.loan_id\n    , l.loan_ident\n    , l.dt_created\n    , l.dt_modified\n    , l.book_copy_id\n    , l.member_id\n    , NULLIF(l.dt_due, '9999-01-01 00:00:00+00'::TIMESTAMPTZ) AS dt_due\n    , NULLIF(l.dt_returned, '9999-01-01 00:00:00+00'::TIMESTAMPTZ) AS dt_returned\nFROM\n    library.loan l\nWHERE\n    l.book_copy_id = $1\nAND\n    l.dt_returned = '9999-01-01 00:00:00+00'::TIMESTAMPTZ\nORDER BY\n    l.loan_id DESC\nLIMIT 1\nFOR UPDATE OF l\n;\n",
   "describe": {
     "columns": [
       {
@@ -45,7 +45,9 @@
       }
     ],
     "parameters": {
-      "Left": []
+      "Left": [
+        "Int4"
+      ]
     },
     "nullable": [
       false,
@@ -58,5 +60,5 @@
       null
     ]
   },
-  "hash": "1f6d0da203873803f61cfaa9bd00a8bc60b61456b9ad14f51408a25e1590a872"
+  "hash": "0165244b62fb14b30e0019c321648560dc15b91a762676ce6cc2209ad594fcf8"
 }
