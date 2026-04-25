@@ -3,16 +3,16 @@ use super::enums::BookCopyStatus;
 use super::errors::BookCopyError;
 
 impl BookCopy {
-    /// Returns `true` when this copy is physically circulatable (not lost, not in maintenance).
+    /// Returns `true` when this copy is physically borrowable (not lost, not in maintenance).
     /// Full borrowability also requires checking that no active loan exists for this copy.
     #[must_use]
-    fn is_circulatable(&self) -> bool {
+    fn is_borrowable(&self) -> bool {
         self.status == BookCopyStatus::Active
     }
 
-    /// Guard: ensures copy is in a circulatable state for borrowing.
-    pub fn ensure_circulatable(&self) -> Result<(), BookCopyError> {
-        if !self.is_circulatable() {
+    /// Guard: ensures copy is in a borrowable state for borrowing.
+    pub fn ensure_can_be_borrowed(&self) -> Result<(), BookCopyError> {
+        if !self.is_borrowable() {
             return Err(BookCopyError::CannotBeBorrowed);
         }
         Ok(())

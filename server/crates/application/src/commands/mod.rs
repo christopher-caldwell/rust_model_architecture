@@ -6,7 +6,6 @@ pub mod membership;
 pub struct AddBookCopyInput {
     pub isbn: String,
     pub barcode: String,
-    pub author_name: String,
 }
 
 pub struct CheckOutBookCopyInput {

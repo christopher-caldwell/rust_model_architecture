@@ -1,6 +1,7 @@
 use anyhow::Context;
+use chrono::Utc;
 use domain::{
-    member::{Member, MemberCreationPayload, MemberError, MemberIdent, MemberStatus},
+    member::{Member, MemberCreationPayload, MemberError, MemberIdent},
     uow::{UnitOfWorkPort, WriteUnitOfWorkFactory},
 };
 use std::sync::Arc;
@@ -68,16 +69,18 @@ impl MembershipCommands {
             .await
             .context("Failed to build unit of work")?;
         let member = self.get_member_by_ident(&*uow, &input.member_ident).await?;
-        if !member.can_be_suspended() {
-            return Err(MemberError::CannotBeSuspended.into());
-        }
-        let result = uow
-            .membership_write_repo()
-            .update_status(member.id, MemberStatus::Suspended)
+        let suspended_status = member.suspend()?;
+        uow.membership_write_repo()
+            .update_status(member.id, suspended_status.clone())
             .await
             .context("Failed to suspend member")?;
         uow.commit().await.context("Failed to commit transaction")?;
-        Ok(result)
+        let updated_member = Member {
+            status: suspended_status,
+            dt_modified: Utc::now(),
+            ..member
+        };
+        Ok(updated_member)
     }
 
     pub async fn reactivate_member(
@@ -90,15 +93,17 @@ impl MembershipCommands {
             .await
             .context("Failed to build unit of work")?;
         let member = self.get_member_by_ident(&*uow, &input.member_ident).await?;
-        if !member.can_be_reactivated() {
-            return Err(MemberError::CannotBeReactivated.into());
-        }
-        let result = uow
-            .membership_write_repo()
-            .update_status(member.id, MemberStatus::Active)
+        let active_status = member.reactivate()?;
+        uow.membership_write_repo()
+            .update_status(member.id, active_status.clone())
             .await
             .context("Failed to reactivate member")?;
         uow.commit().await.context("Failed to commit transaction")?;
-        Ok(result)
+        let updated_member = Member {
+            status: active_status,
+            dt_modified: Utc::now(),
+            ..member
+        };
+        Ok(updated_member)
     }
 }

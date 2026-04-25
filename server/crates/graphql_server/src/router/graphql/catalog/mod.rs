@@ -91,5 +91,4 @@ impl From<CreateCatalogTitleInput> for BookCreationPayload {
 pub struct AddInventoryCopyInput {
     isbn: String,
     barcode: String,
-    author_name: String,
 }

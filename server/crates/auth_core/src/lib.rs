@@ -1,9 +1,9 @@
 mod claims;
 mod error;
-mod port;
 mod jwt;
+mod port;
 
 pub use claims::Claims;
 pub use error::AuthError;
-pub use port::AuthVerifierPort;
 pub use jwt::JwtAuthAdapter;
+pub use port::AuthVerifierPort;

@@ -1,7 +1,8 @@
 use anyhow::Context;
+use chrono::Utc;
 use domain::{
     book::{Book, BookCreationPayload, BookError},
-    book_copy::{BookCopy, BookCopyCreationPayload, BookCopyError, BookCopyStatus},
+    book_copy::{BookCopy, BookCopyCreationPayload, BookCopyError},
     uow::{UnitOfWorkPort, WriteUnitOfWorkFactory},
 };
 use std::sync::Arc;
@@ -72,7 +73,6 @@ impl CatalogCommands {
         let book = self.get_book_by_isbn(&*uow, &input.isbn).await?;
         let prepared = BookCopyCreationPayload {
             barcode: input.barcode,
-            author_name: input.author_name,
             book_id: book.id,
         }
         .prepare();
@@ -95,16 +95,18 @@ impl CatalogCommands {
             .await
             .context("Failed to build unit of work")?;
         let book_copy = self.get_book_copy_by_barcode(&*uow, &barcode).await?;
-        if !book_copy.can_be_marked_lost() {
-            return Err(BookCopyError::CannotMarkBookLost.into());
-        }
-        let result = uow
-            .book_copy_write_repo()
-            .update_status(book_copy.id, BookCopyStatus::Lost)
+        let lost_status = book_copy.mark_lost()?;
+        uow.book_copy_write_repo()
+            .update_status(book_copy.id, lost_status.clone())
             .await
             .context("Failed to mark book copy lost")?;
         uow.commit().await.context("Failed to commit transaction")?;
-        Ok(result)
+        let updated_copy = BookCopy {
+            status: lost_status,
+            dt_modified: Utc::now(),
+            ..book_copy
+        };
+        Ok(updated_copy)
     }
 
     pub async fn mark_book_copy_found(
@@ -117,16 +119,18 @@ impl CatalogCommands {
             .await
             .context("Failed to build unit of work")?;
         let book_copy = self.get_book_copy_by_barcode(&*uow, &barcode).await?;
-        if !book_copy.can_be_returned_from_lost() {
-            return Err(BookCopyError::CannotBeReturnedFromLost.into());
-        }
-        let result = uow
-            .book_copy_write_repo()
-            .update_status(book_copy.id, BookCopyStatus::Active)
+        let found_status = book_copy.mark_found()?;
+        uow.book_copy_write_repo()
+            .update_status(book_copy.id, found_status.clone())
             .await
             .context("Failed to mark book copy found")?;
         uow.commit().await.context("Failed to commit transaction")?;
-        Ok(result)
+        let updated_copy = BookCopy {
+            status: found_status,
+            dt_modified: Utc::now(),
+            ..book_copy
+        };
+        Ok(updated_copy)
     }
 
     pub async fn send_book_copy_to_maintenance(
@@ -139,16 +143,18 @@ impl CatalogCommands {
             .await
             .context("Failed to build unit of work")?;
         let book_copy = self.get_book_copy_by_barcode(&*uow, &barcode).await?;
-        if !book_copy.can_be_sent_to_maintenance() {
-            return Err(BookCopyError::CannotBeSentToMaintenance.into());
-        }
-        let result = uow
-            .book_copy_write_repo()
-            .update_status(book_copy.id, BookCopyStatus::Maintenance)
+        let maintenance_status = book_copy.send_to_maintenance()?;
+        uow.book_copy_write_repo()
+            .update_status(book_copy.id, maintenance_status.clone())
             .await
             .context("Failed to send book copy to maintenance")?;
         uow.commit().await.context("Failed to commit transaction")?;
-        Ok(result)
+        let updated_copy = BookCopy {
+            status: maintenance_status,
+            dt_modified: Utc::now(),
+            ..book_copy
+        };
+        Ok(updated_copy)
     }
 
     pub async fn complete_book_copy_maintenance(
@@ -161,15 +167,17 @@ impl CatalogCommands {
             .await
             .context("Failed to build unit of work")?;
         let book_copy = self.get_book_copy_by_barcode(&*uow, &barcode).await?;
-        if !book_copy.can_be_returned_from_maintenance() {
-            return Err(BookCopyError::CannotBeReturnedFromMaintenance.into());
-        }
-        let result = uow
-            .book_copy_write_repo()
-            .update_status(book_copy.id, BookCopyStatus::Active)
+        let active_status = book_copy.complete_maintenance()?;
+        uow.book_copy_write_repo()
+            .update_status(book_copy.id, active_status.clone())
             .await
             .context("Failed to complete book copy maintenance")?;
         uow.commit().await.context("Failed to commit transaction")?;
-        Ok(result)
+        let updated_copy = BookCopy {
+            status: active_status,
+            dt_modified: Utc::now(),
+            ..book_copy
+        };
+        Ok(updated_copy)
     }
 }

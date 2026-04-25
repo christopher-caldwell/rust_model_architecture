@@ -40,14 +40,11 @@ pub struct MemberReadRepoSql {
 #[async_trait]
 impl MemberReadRepoPort for MemberReadRepoSql {
     async fn get_by_id(&self, member_id: MemberId) -> Result<Option<Member>> {
-        let row = sqlx::query_file_as!(
-            MemberDbRow,
-            "sql/member/queries/get_by_id.sql",
-            member_id.0
-        )
-        .fetch_optional(&self.pool)
-        .await
-        .context("Failed to fetch member by id")?;
+        let row =
+            sqlx::query_file_as!(MemberDbRow, "sql/member/queries/get_by_id.sql", member_id.0)
+                .fetch_optional(&self.pool)
+                .await
+                .context("Failed to fetch member by id")?;
 
         row.map(Member::try_from).transpose()
     }

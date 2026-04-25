@@ -15,7 +15,10 @@ fn map_auth_error(error: auth_core::AuthError) -> StatusCode {
 }
 
 fn authenticate_token(deps: &ServerDeps, token: &str) -> Result<Claims, StatusCode> {
-    deps.auth.verifier.verify_token(token).map_err(map_auth_error)
+    deps.auth
+        .verifier
+        .verify_token(token)
+        .map_err(map_auth_error)
 }
 
 pub async fn auth_middleware(

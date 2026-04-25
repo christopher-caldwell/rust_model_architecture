@@ -66,7 +66,6 @@ pub async fn add_book_copy(
     let input = AddBookCopyInput {
         isbn,
         barcode: body.barcode,
-        author_name: body.author_name,
     };
     let add_book_copy_result = deps.catalog.commands.add_book_copy(input).await;
 

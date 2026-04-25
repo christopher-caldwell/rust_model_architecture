@@ -1,5 +1,5 @@
 use chrono::{DateTime, Utc};
-use domain::book_copy::{BookCopy, BookCopyStatus};
+use domain::book_copy::BookCopy;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
@@ -27,7 +27,7 @@ impl From<BookCopy> for BookCopyResponseBody {
             dt_created: value.dt_created,
             dt_modified: value.dt_modified,
             author_name: value.author_name,
-            status: book_copy_status_text(&value.status),
+            status: value.status.to_string(),
         }
     }
 }
@@ -35,13 +35,4 @@ impl From<BookCopy> for BookCopyResponseBody {
 #[derive(Deserialize, ToSchema)]
 pub struct CreateBookCopyRequestBody {
     pub barcode: String,
-    pub author_name: String,
-}
-
-fn book_copy_status_text(status: &BookCopyStatus) -> String {
-    match status {
-        BookCopyStatus::Active => String::from("active"),
-        BookCopyStatus::Maintenance => String::from("maintenance"),
-        BookCopyStatus::Lost => String::from("lost"),
-    }
 }

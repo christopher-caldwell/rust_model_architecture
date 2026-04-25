@@ -36,7 +36,6 @@ impl CatalogMutation {
         let input = AddBookCopyInput {
             isbn: input.isbn,
             barcode: input.barcode,
-            author_name: input.author_name,
         };
         let copy = deps
             .catalog

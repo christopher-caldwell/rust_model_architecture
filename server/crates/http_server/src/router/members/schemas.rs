@@ -1,5 +1,5 @@
 use chrono::{DateTime, Utc};
-use domain::member::{Member, MemberCreationPayload, MemberStatus};
+use domain::member::{Member, MemberCreationPayload};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
@@ -25,7 +25,7 @@ impl From<Member> for MemberResponseBody {
             ident: value.ident.into(),
             dt_created: value.dt_created,
             dt_modified: value.dt_modified,
-            status: member_status_text(&value.status),
+            status: value.status.to_string(),
             full_name: value.full_name,
             max_active_loans: value.max_active_loans,
         }
@@ -44,12 +44,5 @@ impl From<CreateMemberRequestBody> for MemberCreationPayload {
             full_name: value.full_name,
             max_active_loans: value.max_active_loans,
         }
-    }
-}
-
-fn member_status_text(status: &MemberStatus) -> String {
-    match status {
-        MemberStatus::Active => String::from("active"),
-        MemberStatus::Suspended => String::from("suspended"),
     }
 }
