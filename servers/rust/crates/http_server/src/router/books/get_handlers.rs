@@ -23,14 +23,6 @@ pub async fn get_book_catalog(
     AuthUser(_claims): AuthUser,
     State(deps): State<ServerDeps>,
 ) -> Result<Json<Vec<BookResponseBody>>, ApiError> {
-    let books_result = deps.catalog.queries.get_book_catalog().await;
-
-    let books = match books_result {
-        Ok(books) => books,
-        Err(error) => return Err(service_error(error)),
-    };
-
-    let book_response = books.into_iter().map(BookResponseBody::from).collect();
-
-    Ok(Json(book_response))
+    let books = deps.catalog.queries.get_book_catalog().await.map_err(service_error)?;
+    Ok(Json(books.into_iter().map(BookResponseBody::from).collect()))
 }

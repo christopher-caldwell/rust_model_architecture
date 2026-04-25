@@ -25,12 +25,6 @@ pub async fn register_member(
     State(deps): State<ServerDeps>,
     Json(body): Json<CreateMemberRequestBody>,
 ) -> Result<(StatusCode, Json<MemberResponseBody>), ApiError> {
-    let register_member_result = deps.membership.commands.register_member(body.into()).await;
-
-    let member_response = match register_member_result {
-        Ok(member) => MemberResponseBody::from(member),
-        Err(error) => return Err(command_error(error)),
-    };
-
-    Ok((StatusCode::CREATED, Json(member_response)))
+    let member = deps.membership.commands.register_member(body.into()).await.map_err(command_error)?;
+    Ok((StatusCode::CREATED, Json(MemberResponseBody::from(member))))
 }

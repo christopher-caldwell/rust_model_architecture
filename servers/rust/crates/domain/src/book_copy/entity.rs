@@ -8,6 +8,7 @@ use super::enums::BookCopyStatus;
 #[repr(transparent)]
 pub struct BookCopyId(pub i32);
 
+#[derive(Debug, Clone)]
 pub struct BookCopy {
     pub id: BookCopyId,
     pub barcode: String,
@@ -17,11 +18,13 @@ pub struct BookCopy {
     pub status: BookCopyStatus,
 }
 
+#[derive(Debug, Clone)]
 pub struct BookCopyCreationPayload {
     pub barcode: String,
     pub book_id: BookId,
 }
 
+#[derive(Debug, Clone)]
 pub struct BookCopyPrepared {
     pub barcode: String,
     pub book_id: BookId,

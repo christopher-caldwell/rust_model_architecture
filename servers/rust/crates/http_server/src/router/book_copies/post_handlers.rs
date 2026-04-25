@@ -33,14 +33,8 @@ pub async fn return_book_copy(
     State(deps): State<ServerDeps>,
     Path(barcode): Path<String>,
 ) -> Result<Json<LoanResponseBody>, ApiError> {
-    let return_book_copy_result = deps.lending.commands.return_book_copy(barcode).await;
-
-    let loan_response = match return_book_copy_result {
-        Ok(loan) => Json(LoanResponseBody::from(loan)),
-        Err(error) => return Err(command_error(error)),
-    };
-
-    Ok(loan_response)
+    let loan = deps.lending.commands.return_book_copy(barcode).await.map_err(command_error)?;
+    Ok(Json(LoanResponseBody::from(loan)))
 }
 
 #[utoipa::path(
@@ -65,16 +59,11 @@ pub async fn report_lost_loaned_book_copy(
     State(deps): State<ServerDeps>,
     Path(barcode): Path<String>,
 ) -> Result<Json<BookCopyResponseBody>, ApiError> {
-    let report_lost_loaned_book_copy_result = deps
+    let updated = deps
         .lending
         .commands
         .report_lost_loaned_book_copy(barcode)
-        .await;
-
-    let book_copy_response = match report_lost_loaned_book_copy_result {
-        Ok(updated) => Json(BookCopyResponseBody::from(updated)),
-        Err(error) => return Err(command_error(error)),
-    };
-
-    Ok(book_copy_response)
+        .await
+        .map_err(command_error)?;
+    Ok(Json(BookCopyResponseBody::from(updated)))
 }

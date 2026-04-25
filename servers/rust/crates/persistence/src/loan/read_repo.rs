@@ -49,7 +49,7 @@ async fn get_by_member_ident_with<'e, E>(executor: E, ident: &MemberIdent) -> Re
 where
     E: Executor<'e, Database = Postgres>,
 {
-    let ident_str: String = ident.clone().into();
+    let ident_str = ident.0.clone();
     let rows = sqlx::query_file_as!(
         LoanDbRow,
         "sql/loan/queries/get_by_member_ident.sql",
@@ -113,6 +113,9 @@ pub struct LoanReadRepoSql {
     pub pool: PgPool,
 }
 
+// Demonstrates the transactional read pattern: same port, transaction-scoped executor.
+// Not wired up in bootstrap currently, but kept as a reference for when consistent reads
+// within a write transaction are needed (e.g. read-your-writes within a command).
 #[allow(dead_code)]
 pub struct LoanReadRepoTx {
     pub tx: Arc<Mutex<Option<Transaction<'static, Postgres>>>>,

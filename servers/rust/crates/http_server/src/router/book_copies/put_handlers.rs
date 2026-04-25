@@ -32,14 +32,8 @@ pub async fn mark_book_copy_lost(
     State(deps): State<ServerDeps>,
     Path(barcode): Path<String>,
 ) -> Result<Json<BookCopyResponseBody>, ApiError> {
-    let mark_book_copy_lost_result = deps.catalog.commands.mark_book_copy_lost(barcode).await;
-
-    let book_copy_response = match mark_book_copy_lost_result {
-        Ok(updated) => Json(BookCopyResponseBody::from(updated)),
-        Err(error) => return Err(command_error(error)),
-    };
-
-    Ok(book_copy_response)
+    let updated = deps.catalog.commands.mark_book_copy_lost(barcode).await.map_err(command_error)?;
+    Ok(Json(BookCopyResponseBody::from(updated)))
 }
 
 #[utoipa::path(
@@ -64,16 +58,11 @@ pub async fn send_book_copy_to_maintenance(
     State(deps): State<ServerDeps>,
     Path(barcode): Path<String>,
 ) -> Result<Json<BookCopyResponseBody>, ApiError> {
-    let send_book_copy_to_maintenance_result = deps
+    let updated = deps
         .catalog
         .commands
         .send_book_copy_to_maintenance(barcode)
-        .await;
-
-    let book_copy_response = match send_book_copy_to_maintenance_result {
-        Ok(updated) => Json(BookCopyResponseBody::from(updated)),
-        Err(error) => return Err(command_error(error)),
-    };
-
-    Ok(book_copy_response)
+        .await
+        .map_err(command_error)?;
+    Ok(Json(BookCopyResponseBody::from(updated)))
 }

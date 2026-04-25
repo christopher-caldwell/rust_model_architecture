@@ -68,21 +68,11 @@ pub async fn get_member_loans(
     State(deps): State<ServerDeps>,
     Path(ident): Path<String>,
 ) -> Result<Json<Vec<LoanResponseBody>>, ApiError> {
-    let member_loans_result = deps
+    let loans = deps
         .lending
         .queries
         .get_member_loans(&MemberIdent(ident))
-        .await;
-
-    let member_loans = match member_loans_result {
-        Ok(loans) => loans,
-        Err(error) => return Err(service_error(error)),
-    };
-
-    let member_loans_response = member_loans
-        .into_iter()
-        .map(LoanResponseBody::from)
-        .collect();
-
-    Ok(Json(member_loans_response))
+        .await
+        .map_err(service_error)?;
+    Ok(Json(loans.into_iter().map(LoanResponseBody::from).collect()))
 }

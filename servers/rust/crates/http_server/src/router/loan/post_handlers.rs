@@ -31,12 +31,6 @@ pub async fn check_out_book_copy(
         member_ident: body.member_ident,
         book_copy_barcode: body.book_copy_barcode,
     };
-    let check_out_book_copy_result = deps.lending.commands.check_out_book_copy(input).await;
-
-    let loan_response = match check_out_book_copy_result {
-        Ok(loan) => (StatusCode::CREATED, Json(LoanResponseBody::from(loan))),
-        Err(error) => return Err(command_error(error)),
-    };
-
-    Ok(loan_response)
+    let loan = deps.lending.commands.check_out_book_copy(input).await.map_err(command_error)?;
+    Ok((StatusCode::CREATED, Json(LoanResponseBody::from(loan))))
 }

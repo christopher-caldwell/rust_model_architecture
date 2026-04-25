@@ -35,12 +35,6 @@ pub async fn reactivate_member(
     let input = MemberIdentInput {
         member_ident: ident,
     };
-    let reactivate_member_result = deps.membership.commands.reactivate_member(input).await;
-
-    let member_response = match reactivate_member_result {
-        Ok(updated) => Json(MemberResponseBody::from(updated)),
-        Err(error) => return Err(command_error(error)),
-    };
-
-    Ok(member_response)
+    let updated = deps.membership.commands.reactivate_member(input).await.map_err(command_error)?;
+    Ok(Json(MemberResponseBody::from(updated)))
 }

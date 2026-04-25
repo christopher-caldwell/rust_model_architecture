@@ -74,13 +74,13 @@ pub async fn create_server_deps(config: &ServerConfig) -> Result<ServerDeps> {
     let book_read_repo = Arc::new(BookReadRepoSql {
         pool: ro_pool.clone(),
     });
-    let book_copy_read_repo = Arc::new(BookCopyReadRepoSql { pool: ro_pool });
+    let book_copy_read_repo = Arc::new(BookCopyReadRepoSql {
+        pool: ro_pool.clone(),
+    });
     let loan_read_repo = Arc::new(LoanReadRepoSql {
-        pool: book_copy_read_repo.pool.clone(),
+        pool: ro_pool.clone(),
     });
-    let member_read_repo = Arc::new(MemberReadRepoSql {
-        pool: loan_read_repo.pool.clone(),
-    });
+    let member_read_repo = Arc::new(MemberReadRepoSql { pool: ro_pool });
     let ident_generator = Arc::new(MemberIdentGenerator);
 
     let catalog_commands = Arc::new(CatalogCommands::new(write_uow_factory.clone()));

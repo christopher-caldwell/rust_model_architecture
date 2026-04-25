@@ -50,7 +50,7 @@ impl MemberReadRepoPort for MemberReadRepoSql {
     }
 
     async fn get_by_ident(&self, ident: &MemberIdent) -> Result<Option<Member>> {
-        let ident_str: String = ident.clone().into();
+        let ident_str = ident.0.clone();
         let row = sqlx::query_file_as!(
             MemberDbRow,
             "sql/member/queries/get_by_ident.sql",

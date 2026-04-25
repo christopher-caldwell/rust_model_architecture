@@ -28,7 +28,7 @@ impl MemberWriteRepoPort for MemberWriteRepoTx {
         let prepared_result = sqlx::query_file_as!(
             MemberPreparedResult,
             "sql/member/commands/create.sql",
-            String::from(insert.ident.clone()),
+            insert.ident.0.clone(),
             insert.status.to_string(),
             insert.full_name,
             insert.max_active_loans,
@@ -53,7 +53,7 @@ impl MemberWriteRepoPort for MemberWriteRepoTx {
     async fn get_by_ident_for_update(&self, ident: &MemberIdent) -> Result<Option<Member>> {
         let mut guard = self.tx.lock().await;
         let tx = guard.as_mut().context("Transaction already consumed")?;
-        let ident_str: String = ident.clone().into();
+        let ident_str = ident.0.clone();
         let row = sqlx::query_file_as!(
             MemberDbRow,
             "sql/member/commands/get_by_ident_for_update.sql",

@@ -4,6 +4,7 @@ use chrono::{DateTime, Utc};
 #[repr(transparent)]
 pub struct BookId(pub i32);
 
+#[derive(Debug, Clone)]
 pub struct Book {
     pub id: BookId,
     pub isbn: String,
@@ -13,12 +14,14 @@ pub struct Book {
     pub author_name: String,
 }
 
+#[derive(Debug, Clone)]
 pub struct BookCreationPayload {
     pub isbn: String,
     pub title: String,
     pub author_name: String,
 }
 
+#[derive(Debug, Clone)]
 pub struct BookPrepared {
     pub isbn: String,
     pub title: String,

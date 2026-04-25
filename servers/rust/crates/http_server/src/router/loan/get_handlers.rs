@@ -23,17 +23,6 @@ pub async fn get_overdue_loans(
     AuthUser(_claims): AuthUser,
     State(deps): State<ServerDeps>,
 ) -> Result<Json<Vec<LoanResponseBody>>, ApiError> {
-    let overdue_loans_result = deps.lending.queries.get_overdue_loans().await;
-
-    let overdue_loans = match overdue_loans_result {
-        Ok(loans) => loans,
-        Err(error) => return Err(service_error(error)),
-    };
-
-    let overdue_loan_response = overdue_loans
-        .into_iter()
-        .map(LoanResponseBody::from)
-        .collect();
-
-    Ok(Json(overdue_loan_response))
+    let loans = deps.lending.queries.get_overdue_loans().await.map_err(service_error)?;
+    Ok(Json(loans.into_iter().map(LoanResponseBody::from).collect()))
 }

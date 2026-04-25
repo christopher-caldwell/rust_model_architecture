@@ -16,6 +16,7 @@ impl From<MemberIdent> for String {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct Member {
     pub id: MemberId,
     pub ident: MemberIdent,
@@ -26,11 +27,13 @@ pub struct Member {
     pub max_active_loans: i16,
 }
 
+#[derive(Debug, Clone)]
 pub struct MemberCreationPayload {
     pub full_name: String,
     pub max_active_loans: i16,
 }
 
+#[derive(Debug, Clone)]
 pub struct MemberPrepared {
     pub ident: MemberIdent,
     pub full_name: String,

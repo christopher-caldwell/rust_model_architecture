@@ -16,6 +16,7 @@ impl From<LoanIdent> for String {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct Loan {
     pub id: LoanId,
     pub ident: LoanIdent,
@@ -27,11 +28,13 @@ pub struct Loan {
     pub dt_returned: Option<DateTime<Utc>>,
 }
 
+#[derive(Debug, Clone)]
 pub struct LoanCreationPayload {
     pub member_id: MemberId,
     pub book_copy_id: BookCopyId,
 }
 
+#[derive(Debug, Clone)]
 pub struct LoanPrepared {
     pub member_id: MemberId,
     pub book_copy_id: BookCopyId,
