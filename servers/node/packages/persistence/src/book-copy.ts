@@ -9,25 +9,26 @@ import type {
   BookCopyWriteRepository
 } from "@library/domain";
 
-import type { BookCopyRow } from "./mappers.js";
 import { mapBookCopy } from "./mappers.js";
-import { sql } from "./sql.js";
-
-interface BookCopyCreateRow {
-  book_copy_id: number;
-}
+import {
+  createBookCopy,
+  getBookCopyByBarcode,
+  getBookCopyByBarcodeForUpdate,
+  getBookCopyById,
+  updateBookCopyStatus
+} from "./queries/book-copy.queries.js";
 
 export class BookCopyReadRepositoryPostgres implements BookCopyReadRepository {
   constructor(private readonly pool: Pool) {}
 
   async getById(id: BookCopyId): Promise<BookCopy | null> {
-    const result = await this.pool.query<BookCopyRow>(sql.bookCopy.getById, [id]);
-    return result.rows[0] === undefined ? null : mapBookCopy(result.rows[0]);
+    const rows = await getBookCopyById.run({ book_copy_id: id }, this.pool);
+    return rows[0] === undefined ? null : mapBookCopy(rows[0]);
   }
 
   async getByBarcode(barcode: string): Promise<BookCopy | null> {
-    const result = await this.pool.query<BookCopyRow>(sql.bookCopy.getByBarcode, [barcode]);
-    return result.rows[0] === undefined ? null : mapBookCopy(result.rows[0]);
+    const rows = await getBookCopyByBarcode.run({ barcode }, this.pool);
+    return rows[0] === undefined ? null : mapBookCopy(rows[0]);
   }
 }
 
@@ -35,12 +36,15 @@ export class BookCopyWriteRepositoryPostgres implements BookCopyWriteRepository 
   constructor(private readonly client: PoolClient) {}
 
   async create(insert: BookCopyPrepared): Promise<BookCopy> {
-    const result = await this.client.query<BookCopyCreateRow>(sql.bookCopy.create, [
-      insert.book_id,
-      insert.status,
-      insert.barcode
-    ]);
-    const created = result.rows[0];
+    const rows = await createBookCopy.run(
+      {
+        book_id: insert.book_id,
+        status: insert.status,
+        barcode: insert.barcode
+      },
+      this.client
+    );
+    const created = rows[0];
     if (created === undefined) throw new Error("Failed to create book copy");
 
     const now = new Date();
@@ -55,11 +59,11 @@ export class BookCopyWriteRepositoryPostgres implements BookCopyWriteRepository 
   }
 
   async getByBarcodeForUpdate(barcode: string): Promise<BookCopy | null> {
-    const result = await this.client.query<BookCopyRow>(sql.bookCopy.getByBarcodeForUpdate, [barcode]);
-    return result.rows[0] === undefined ? null : mapBookCopy(result.rows[0]);
+    const rows = await getBookCopyByBarcodeForUpdate.run({ barcode }, this.client);
+    return rows[0] === undefined ? null : mapBookCopy(rows[0]);
   }
 
   async updateStatus(id: BookCopyId, status: BookCopyStatus): Promise<void> {
-    await this.client.query(sql.bookCopy.updateStatus, [id, status]);
+    await updateBookCopyStatus.run({ book_copy_id: id, status }, this.client);
   }
 }
